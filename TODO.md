@@ -15,7 +15,11 @@
  - Add abstraction layer between GH HTTP data and the rest of the app - we want to potentially allow sources
    other than Github if it turns out that this project works well (e.g. a noddy server which does the
    git-fu for you to splat back the required data in the right format, and said server can persist comments,
-   etc).
+   etc). This would probably also need to extend to getting the PR information to start with. Something like:
+    * `getPullRequest(repoIdentifier, requestIdentifier)` -> `getPullRequest("Kegsay/github-pull-review", "3")`
+      which translates to an HTTP poke to the known GH API (or some defined noddy server API if we get that far).
+      Returned data would have to match what GH currently provides: title, PR state, creator, create TS, update
+      TS, resolve TS, head commit, branch name, etc.
  
 ## Structure
  - Use an event emitter. UI widgets should simply be emitting events and rendering what their told (by listening
