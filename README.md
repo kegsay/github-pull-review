@@ -19,8 +19,11 @@ First, `git clone` this repo. Then:
 ```
  $ npm install
  $ npm run build
- $ cd build
- $ http-server
 ```
 
-*The* `build` *directory is actually a submodule pointing to* `gh-pages`.
+Then host the `build` folder (e.g. using `http-server`). **The** `build` **directory is actually a submodule pointing to** `gh-pages`. If you would prefer to get the build that is running from `gh-pages`, then:
+
+```
+ $ cd build
+ $ git submodule update --init --recursive
+```
