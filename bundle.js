@@ -7,11 +7,43 @@ React.render(
     document.getElementById('container')
 );
 
-},{"./components/main-page":2}],2:[function(require,module,exports){
-module.exports = React.createClass({displayName: 'MainPage',
+},{"./components/main-page":3}],2:[function(require,module,exports){
+module.exports = React.createClass({displayName: 'InfoGetter',
+
+    getInitialState: function() {
+        return {
+            token: localStorage.getItem("access_token")
+        };
+    },
+
+    handleChange: function(event) {
+        this.setState({
+            token: event.target.value
+        });
+        localStorage.setItem("access_token", event.target.value);
+    },
+
     render: function() {
-        return React.createElement("div", null, "MainPage ", this.props.name);
+        var ele = React.createElement.bind(React);
+        var token = this.state.token;
+        return ele("div", null,
+            ele("input", {
+                type: "text", placeholder: "access_token",
+                value: token, onChange: this.handleChange
+            })
+        );
     }
 });
 
-},{}]},{},[1]);
+},{}],3:[function(require,module,exports){
+var InfoGetter = require("./info-getter");
+
+module.exports = React.createClass({displayName: 'MainPage',
+    render: function() {
+        return React.createElement("div", null,
+            React.createElement(InfoGetter)
+        );
+    }
+});
+
+},{"./info-getter":2}]},{},[1]);
