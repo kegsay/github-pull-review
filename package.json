@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "browserify": "^11.1.0",
-    "http-server": "^0.8.0"
+    "http-server": "^0.8.0",
+    "shelljs": "^0.5.3"
   },
   "devDependencies": {},
   "scripts": {
