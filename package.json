@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "build": "browserify -e lib/app.js -o build/bundle.js",
+    "build": "browserify -e lib/app.js -o build/bundle.js && shjs build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

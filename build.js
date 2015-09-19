@@ -1,3 +1,3 @@
 require("shelljs/global");
 
-cp("index.html", "build/index.html");
+cp("-f", "index.html", "build/index.html");
