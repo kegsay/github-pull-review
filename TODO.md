@@ -4,7 +4,7 @@
  - Use JSX proper given we already have a compile step with browserify. Remove `key:` on `InfoGetter` elements.
  
 ## UI
- - Add components for `PullRequestOverview`, `DiffView`, `CommentView`.
+ - Add components for `PullRequestOverview`, `DiffView`, `CommentView` for now.
  
 ## Auth
  - Swap to using actual OAuth2 auth flows rather than expect the user to do the dance and splat to the input box.
@@ -12,6 +12,10 @@
 ## API
  - Add a `logic` directory and add classes for `PullRequest`, `Comment`, `Diff`, `Commit`, `GithubUser`.
  - Add classes for doing the HTTP pokes to GH: `GithubApi`.
+ - Add abstraction layer between GH HTTP data and the rest of the app - we want to potentially allow sources
+   other than Github if it turns out that this project works well (e.g. a noddy server which does the
+   git-fu for you to splat back the required data in the right format, and said server can persist comments,
+   etc).
  
 ## Structure
  - Use an event emitter. UI widgets should simply be emitting events and rendering what their told (by listening
