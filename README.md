@@ -19,8 +19,8 @@ First, `git clone` this repo. Then:
 ```
  $ npm install
  $ npm run build
+ $ cd build
+ $ http-server
 ```
-
-Finally, host the `build` directory.
 
 *The* `build` *directory is actually a submodule pointing to* `gh-pages`.
