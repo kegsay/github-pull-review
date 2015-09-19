@@ -13,3 +13,14 @@ This project aims to fix these issues, whilst maintaining the familiarity, look 
 
 This is all also hosted on [Github pages](http://kegsay.github.io/github-pull-review/) but you can also `git clone` this repo and run it locally.
 
+## Building locally
+First, `git clone` this repo. Then:
+
+```
+ $ npm install
+ $ npm run build
+```
+
+Finally, host the `build` directory.
+
+*The* `build` *directory is actually a submodule pointing to* `gh-pages`.
