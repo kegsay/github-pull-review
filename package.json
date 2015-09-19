@@ -1,0 +1,29 @@
+{
+  "name": "github-pull-review",
+  "version": "0.1.0",
+  "description": "A UI to display Github pull requests more nicely",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kegsay/github-pull-review.git"
+  },
+  "keywords": [
+    "github",
+    "pr",
+    "pull-request",
+    "code-review"
+  ],
+  "author": "Kegan Dougal",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Kegsay/github-pull-review/issues"
+  },
+  "homepage": "https://github.com/Kegsay/github-pull-review#readme",
+  "dependencies": {
+    "http-server": "^0.8.0"
+  }
+}
