@@ -11,10 +11,5 @@ Github's UI for reviewing pull requests isn't great. You can't:
  
 This project aims to fix these issues, whilst maintaining the familiarity, look and feel of the existing pull request system. To that end, this project makes heavy use of the Github API, rather than rolling its own system for tracking pull requests and comments.
 
-This is all hosted [Github pages](http://kegsay.github.io/github-pull-review/) but you can also `git clone` this repo and run it locally.
+This is all also hosted on [Github pages](http://kegsay.github.io/github-pull-review/) but you can also `git clone` this repo and run it locally.
 
-# Usage
-
-## Getting an access token
-
-## Doing pull reviews
