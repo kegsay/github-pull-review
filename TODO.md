@@ -1,40 +1,26 @@
 # TODO
 
 ## Tooling
- - Use JSX proper given we already have a compile step with browserify. Remove `key:` on `InfoGetter` elements.
+ - Find a way to watch for changes in `index.css` and then do another build.
  
 ## UI
- - Add components for `PullRequestOverview`, `DiffView`, `CommentView` for now.
+ - Add components for `DiffView` and `CommentView`.
  
 ## Auth
  - Swap to using actual OAuth2 auth flows rather than expect the user to do the dance and splat to the input box.
  
 ## API
- - Add a `logic` directory and add classes for `PullRequest`, `Comment`, `Diff`, `Commit`, `GithubUser`.
- - Add classes for doing the HTTP pokes to GH: `GithubApi`.
- - Add abstraction layer between GH HTTP data and the rest of the app - we want to potentially allow sources
-   other than Github if it turns out that this project works well (e.g. a noddy server which does the
-   git-fu for you to splat back the required data in the right format, and said server can persist comments,
-   etc). This would probably also need to extend to getting the PR information to start with. Something like:
-    * `getPullRequest(repoIdentifier, requestIdentifier)` -> `getPullRequest("Kegsay/github-pull-review", "3")`
-      which translates to an HTTP poke to the known GH API (or some defined noddy server API if we get that far).
-      Returned data would have to match what GH currently provides: title, PR state, creator, create TS, update
-      TS, resolve TS, head commit, branch name, etc.
- 
-## Structure
- - Use an event emitter. UI widgets should simply be emitting events and rendering what their told (by listening
-   for well-defined event names), and should have ZERO logic at all (even `InfoGetter` in its' current form is
-   doing too much by touching `LocalStorage`.
- - Potentially have 2 emitters on the go? UI emitter and Logic emitter (so we can more freely loosely couple logic
-   and UI components).
+ - Add classes for `PullRequest`, `Comment`, `Diff`, `Commit`, `GithubUser` and actually model threading/comment resolution correctly.
+
+## Bitty things
+ - Auto-load the last PR from local storage.
+ - Put the repo/PR# into a URL fragment and allow back button navigation to go back a PR?
    
 # Notes
-
-The main API endpoints we want are:
- - List of open PRs: https://api.github.com/repos/OWNER/REPO/pulls?access_token=TOKEN
- - PR: https://api.github.com/repos/OWNER/REPO/pulls/PRNUM?access_token=TOKEN
- - PR Comments: https://api.github.com/repos/OWNER/REPO/issues/PRNUM/comments?access_token=TOKEN
- - PR Line Comments: https://api.github.com/repos/OWNER/REPO/pulls/PRNUM/comments?access_token=TOKEN
+ - Need somewhere to store the "done" markers. (can we be cheeky on do this local storage, since it is most
+   probable that they will be using the same machine for the fix?)
+ - Need some representation and storage of threading markers. (e.g. ID of the comment in the reply?)
+ - Need some representation and storage of "comment resolved by commit X".
  
 # Goals
  - Do the OAuth dance to get a token, then show a list of projects for that user (? how - check API exists).
