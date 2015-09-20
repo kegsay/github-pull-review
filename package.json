@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "browserify": "^11.1.0",
+    "flux": "^2.1.1",
     "http-server": "^0.8.0",
     "react-tools": "^0.13.3",
     "shelljs": "^0.5.3"
