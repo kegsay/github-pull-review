@@ -8,6 +8,7 @@
     "flux": "^2.1.1",
     "http-server": "^0.8.0",
     "react-tools": "^0.13.3",
+    "request": "^2.62.0",
     "shelljs": "^0.5.3"
   },
   "devDependencies": {
