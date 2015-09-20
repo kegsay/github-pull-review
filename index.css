@@ -32,3 +32,17 @@
 .PullRequestOverview_state_closed {
     background-color: #bd2c00;
 }
+
+.CommentView {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.CommentView_header {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #eee;
+}
+
+.CommentView_body {
+    padding: 15px;
+}
