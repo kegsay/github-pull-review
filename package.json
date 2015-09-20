@@ -6,11 +6,12 @@
   "dependencies": {
     "browserify": "^11.1.0",
     "http-server": "^0.8.0",
+    "react-tools": "^0.13.3",
     "shelljs": "^0.5.3"
   },
   "devDependencies": {},
   "scripts": {
-    "build": "browserify -e lib/app.js -o build/bundle.js && shjs build.js",
+    "build": "jsx lib/ gen/ && browserify -e gen/app.js -o build/bundle.js && shjs build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
