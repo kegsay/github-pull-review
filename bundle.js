@@ -482,14 +482,13 @@ GithubApi.prototype.getPullRequestComments = function(repo, pr) {
 
 GithubApi.prototype._get = function(path) {
     var p = Promise.defer();
+    var qs = this.token ? { access_token: this.token } : {};
     request({
         uri: (this.url + path),
         method: "GET",
         json: true,
         withCredentials: false,
-        qs: {
-            access_token: this.token
-        }
+        qs: qs
     }, function(err, response, body) {
         if (err) {
             p.reject(err);
