@@ -97,6 +97,7 @@ module.exports = React.createClass({displayName: 'InfoGetter',
         initialState[KEY_TOKEN] = this.props.store.getAccessToken();
         initialState[KEY_REPO] = this.props.store.getRepositoryId();
         initialState[KEY_REQ] = this.props.store.getRequestId();
+        this._view(initialState[KEY_REPO], initialState[KEY_REQ]);
         return initialState;
     },
 
@@ -121,11 +122,18 @@ module.exports = React.createClass({displayName: 'InfoGetter',
         }
     },
 
-    onView: function() {
+    _view: function(repo, req) {
+        if (!repo || !req) {
+            return;
+        }
         dispatcher.dispatch(actions.create("view_pr", {
-            repo_id: this.state[KEY_REPO],
-            request_id: this.state[KEY_REQ]
+            repo_id: repo,
+            request_id: req
         }));
+    },
+
+    onView: function() {
+        this._view(this.state[KEY_REPO], this.state[KEY_REQ]);
     },
 
     render: function() {
@@ -241,7 +249,7 @@ module.exports = React.createClass({displayName: 'PullRequestOverview',
                 React.createElement("div", {className: "PullRequestOverview_title"}, 
                     pr.title, " (", React.createElement("a", {href: pr.html_link, target: "_blank"}, "#", pr.id), ")"
                 ), 
-                React.createElement("div", null, 
+                React.createElement("div", {className: "PullRequestOverview_status_bar"}, 
                     React.createElement("span", {className: "PullRequestOverview_state PullRequestOverview_state_" + pr.state}, 
                         pr.state
                     ), 
