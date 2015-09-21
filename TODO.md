@@ -4,7 +4,7 @@
  - Find a way to watch for changes in `index.css` and then do another build.
  
 ## UI
- - Add components for `DiffView` and `CommentView`.
+ - Add components for `DiffView` (file with side-by-side diff, can click any line to comment), `ThreadedCommentView` (collapsible).
  
 ## Auth
  - Swap to using actual OAuth2 auth flows rather than expect the user to do the dance and splat to the input box.
@@ -13,12 +13,10 @@
  - Add classes for `PullRequest`, `Comment`, `Diff`, `Commit`, `GithubUser` and actually model threading/comment resolution correctly.
 
 ## Bitty things
- - Auto-load the last PR from local storage.
  - Put the repo/PR# into a URL fragment and allow back button navigation to go back a PR?
    
 # Notes
- - Need somewhere to store the "done" markers. (can we be cheeky on do this local storage, since it is most
-   probable that they will be using the same machine for the fix?)
+ - Need somewhere to store the "done" markers. (we can do commit comments, so there maybe?)
  - Need some representation and storage of threading markers. (e.g. ID of the comment in the reply?)
  - Need some representation and storage of "comment resolved by commit X".
  
@@ -30,5 +28,3 @@
  - Overview page has line diffs with threaded comments (? how do we store threading info) and live edits
    (? how do we commit on behalf of the user - check API), and "done" markers (? how and where do we store
    done list - check GH API for useful places, or do `git notes`?)
- - Look and feel should be like it was using github, so same sort of CSS (though probably not a complete
-   rip-off because copyright :) )
