@@ -1,4 +1,8 @@
-body textarea {
+body {
+    font-family: Helvetica, arial;
+}
+
+textarea {
     font-family: Helvetica, arial;
 }
 
