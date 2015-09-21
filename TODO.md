@@ -5,6 +5,7 @@
  
 ## UI
  - Add components for `DiffView` (file with side-by-side diff, can click any line to comment), `ThreadedCommentView` (collapsible).
+ - Add "checklist" reminders for reviewing.
  
 ## Auth
  - Swap to using actual OAuth2 auth flows rather than expect the user to do the dance and splat to the input box.
