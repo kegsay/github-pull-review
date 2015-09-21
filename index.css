@@ -1,3 +1,7 @@
+body {
+    font-family: Helvetica, arial;
+}
+
 .inline_code {
     font-family: "Lucida Console", Monaco, monospace;
     color: #336677;
@@ -8,6 +12,10 @@
     word-wrap: break-word;
     font-size: 30px;
     padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.PullRequestOverview_status_bar {
     padding-bottom: 10px;
 }
 
