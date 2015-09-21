@@ -153,6 +153,31 @@ marked.setOptions({
   smartypants: false
 });
 
+function timeSince(date) {
+    var seconds = Math.floor((new Date() - date) / 1000);
+    var interval = Math.floor(seconds / 31536000);
+    if (interval > 1) {
+        return interval + " years";
+    }
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) {
+        return interval + " months";
+    }
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) {
+        return interval + " days";
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) {
+        return interval + " hours";
+    }
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+        return interval + " minutes";
+    }
+    return Math.floor(seconds) + " seconds";
+}
+
 module.exports = React.createClass({displayName: 'CommentView',
 
     render: function() {
@@ -170,8 +195,9 @@ module.exports = React.createClass({displayName: 'CommentView',
 
         return (
             React.createElement("div", {className: "CommentView"}, 
+                React.createElement("img", {className: "CommentView_avatar", src: comment.avatar}), 
                 React.createElement("div", {className: "CommentView_header"}, 
-                    React.createElement("a", {href: comment.by_url, target: "_blank"}, comment.by), " commented"
+                    React.createElement("a", {href: comment.by_url, target: "_blank"}, comment.by), " commented ", timeSince(comment.ts), " ago"
                 ), 
                 React.createElement("div", {className: "CommentView_body", 
                     dangerouslySetInnerHTML: {__html: markdownHtml}}
@@ -591,7 +617,9 @@ Controller.prototype._view_pr = function(data) {
             return {
                 body: apiComment.body,
                 by: apiComment.user.login,
-                by_url: apiComment.user.html_url
+                by_url: apiComment.user.html_url,
+                ts: new Date(apiComment.created_at),
+                avatar: apiComment.user.avatar_url
             };
         });
 
@@ -600,7 +628,9 @@ Controller.prototype._view_pr = function(data) {
             comments.unshift({
                 body: body.body,
                 by: body.user.login,
-                by_url: body.user.html_url
+                by_url: body.user.html_url,
+                ts: new Date(body.created_at),
+                avatar: body.user.avatar_url
             });
         }
 

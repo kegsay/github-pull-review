@@ -1,5 +1,13 @@
-body textarea {
+body {
     font-family: Helvetica, arial;
+}
+
+textarea {
+    font-family: Helvetica, arial;
+}
+
+code {
+    background-color: rgba(0,0,0,0.04)
 }
 
 .inline_code {
@@ -56,12 +64,23 @@ body textarea {
 .CommentView {
     border: 1px solid #ddd;
     border-radius: 5px;
+    margin-top: 10px;
+    margin-left: 64px;
+}
+
+.CommentView_avatar {
+    height: 48px;
+    width: 48px;
+    float: left;
+    margin-left: -64px;
 }
 
 .CommentView_header {
     background-color: #f5f5f5;
     border-bottom: 1px solid #eee;
     padding-left: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .CommentView_body {
