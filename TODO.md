@@ -5,6 +5,7 @@
  
 ## UI
  - Add components for `DiffView` (file with side-by-side diff, can click any line to comment).
+ - Diff slider to allow you to see diffs between any revisions of that file between relevant commits.
  - Add "checklist" reminders for reviewing.
  
 ## Auth
