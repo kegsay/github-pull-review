@@ -92,3 +92,35 @@ code {
 .CommentView_body {
     padding-left: 15px;
 }
+
+
+
+.CommitView {
+    border: 1px solid #ddd;
+    margin-top: 10px;
+    margin-left: 64px;
+    padding: 5px;
+}
+
+.CommitView_avatar {
+    height: 2.5em;
+    float: left;
+    margin-left: -64px;
+}
+
+.CommitView_title {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 1em;
+}
+
+.CommitView_showButton {
+    margin-left: 10px;
+}
+
+.CommitView_meta {
+    color: #777777;
+    height: 1em;
+    padding-top: 0.5em;
+}
