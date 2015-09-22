@@ -136,6 +136,10 @@ blockquote {
     height: 1em;
 }
 
+.CommitView_desc {
+    font-size: smaller;
+}
+
 .CommitView_showButton {
     margin-left: 10px;
 }
