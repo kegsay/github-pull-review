@@ -14,12 +14,15 @@
     "shelljs": "^0.5.3"
   },
   "devDependencies": {
+    "eslint": "^1.5.1",
+    "eslint-plugin-react": "^3.4.2",
     "parallelshell": "^2.0.0",
     "watchify": "^3.4.0"
   },
   "scripts": {
     "build": "jsx lib/ gen/ && browserify -e gen/app.js -o build/bundle.js && shjs build.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint lib",
     "watch": "parallelshell \"jsx -w lib/ gen/\"  \"watchify -e gen/app.js -o build/bundle.js\""
   },
   "repository": {

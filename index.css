@@ -16,6 +16,8 @@ code {
     background-color: #e8f0f8;
 }
 
+
+
 .PullRequestOverview_title {
     word-wrap: break-word;
     font-size: 30px;
@@ -49,6 +51,8 @@ code {
     background-color: #bd2c00;
 }
 
+
+
 .CommentBox_textarea {
     line-height: 1.5em;
     min-height: 9em;
@@ -60,6 +64,8 @@ code {
     min-height: 9em;
     width: 100%;
 }
+
+
 
 .CommentView {
     border: 1px solid #ddd;
