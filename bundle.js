@@ -131,43 +131,10 @@ module.exports = React.createClass({displayName: 'CommentBox',
 });
 
 },{"../logic/actions":11,"../logic/dispatcher":14,"./utils":10}],3:[function(require,module,exports){
-"use strict";
-
-module.exports = React.createClass({displayName: 'CommentView',
-
-    render: function() {
-        var comment = this.props.comment;
-        if (!comment) {
-            return (
-                React.createElement("div", null, 
-                    "No comment."
-                )
-            );
-        }
-
-        return (
-            React.createElement("div", {className: "CommentView"}, 
-                React.createElement("img", {className: "CommentView_avatar", src: 
-                    comment.getUser().getAvatarUrl()
-                }), 
-                React.createElement("div", {className: "CommentView_header"}, 
-                    comment.getUser().getUserLinkJsx(), " commented ", 
-                        comment.getTimeAgo(), 
-                    " ago"
-                ), 
-                React.createElement("div", {className: "CommentView_body", 
-                    dangerouslySetInnerHTML: {__html: comment.getHtmlBody()}}
-                )
-            )
-        );
-    }
-});
-
-},{}],4:[function(require,module,exports){
 var CommentView = require("./comment-view");
 var CommentBox = require("./comment-box");
 
-module.exports = React.createClass({displayName: 'CommentsView',
+module.exports = React.createClass({displayName: 'CommentListView',
 
     render: function() {
         if (!this.props.comments || this.props.comments.length === 0) {
@@ -193,7 +160,46 @@ module.exports = React.createClass({displayName: 'CommentsView',
     }
 });
 
-},{"./comment-box":2,"./comment-view":3}],5:[function(require,module,exports){
+},{"./comment-box":2,"./comment-view":4}],4:[function(require,module,exports){
+"use strict";
+
+module.exports = React.createClass({displayName: 'CommentView',
+
+    render: function() {
+        var comment = this.props.comment;
+        if (!comment) {
+            return (
+                React.createElement("div", null, 
+                    "No comment."
+                )
+            );
+        }
+
+        var htmlBody = comment.getHtmlBody();
+
+        if (/<\/blockquote>$/.test(htmlBody)) {
+            // TODO ends in a block quote, hide it behind a toggle button.
+        }
+
+        return (
+            React.createElement("div", {className: "CommentView"}, 
+                React.createElement("img", {className: "CommentView_avatar", src: 
+                    comment.getUser().getAvatarUrl()
+                }), 
+                React.createElement("div", {className: "CommentView_header"}, 
+                    comment.getUser().getUserLinkJsx(), " commented ", 
+                        comment.getTimeAgo(), 
+                    " ago"
+                ), 
+                React.createElement("div", {className: "CommentView_body", 
+                    dangerouslySetInnerHTML: {__html: htmlBody}}
+                )
+            )
+        );
+    }
+});
+
+},{}],5:[function(require,module,exports){
 "use strict";
 var CommitView = require("./commit-view");
 
@@ -399,7 +405,7 @@ module.exports = React.createClass({displayName: 'MainPage',
 var ActionMixin = require("../logic/actions").ActionMixin([
     "pr_info"
 ]);
-var CommentsView = require("./comments-view");
+var CommentListView = require("./comment-list-view");
 var CommitListView = require("./commit-list-view");
 
 module.exports = React.createClass({displayName: 'PullRequestOverview',
@@ -447,7 +453,7 @@ module.exports = React.createClass({displayName: 'PullRequestOverview',
                 break;
             case "comments":
                 mainSection = (
-                    React.createElement(CommentsView, {comments: pr.comments, 
+                    React.createElement(CommentListView, {comments: pr.comments, 
                         repo: pr.owner_repo, req: pr.id})
                 );
                 break;
@@ -507,7 +513,7 @@ module.exports = React.createClass({displayName: 'PullRequestOverview',
     }
 });
 
-},{"../logic/actions":11,"./comments-view":4,"./commit-list-view":5}],10:[function(require,module,exports){
+},{"../logic/actions":11,"./comment-list-view":3,"./commit-list-view":5}],10:[function(require,module,exports){
 "use strict";
 var marked = require("marked");
 marked.setOptions({

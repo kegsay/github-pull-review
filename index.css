@@ -6,11 +6,32 @@ textarea {
     font-family: Helvetica, arial;
 }
 
-code {
-    background-color: rgba(0,0,0,0.04)
+code { /* make `text` have a background colour */
+    background-color: #eee
 }
 
-.inline_code {
+code::before { /* adds a bit of padding left of `text` */
+    letter-spacing: -0.2em;
+    content: "\00a0";
+}
+
+code::after { /* adds a bit of padding right of `text` */
+    letter-spacing: -0.2em;
+    content: "\00a0";
+}
+
+pre {
+    background-color: #eee /* fills the entire ``` block with colour */
+}
+
+blockquote {
+    padding-left: 15px;
+    padding-right: 15px;
+    color: #777;
+    border-left: 4px solid #ddd;
+}
+
+.inline_code { /* For the main commit title mainly */
     font-family: "Lucida Console", Monaco, monospace;
     color: #336677;
     background-color: #e8f0f8;
@@ -113,6 +134,10 @@ code {
     text-overflow: ellipsis;
     overflow: hidden;
     height: 1em;
+}
+
+.CommitView_desc {
+    font-size: smaller;
 }
 
 .CommitView_showButton {
