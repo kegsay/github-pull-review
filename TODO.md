@@ -4,14 +4,15 @@
  - Find a way to watch for changes in `index.css` and then do another build.
  
 ## UI
- - Add components for `DiffView` (file with side-by-side diff, can click any line to comment), `ThreadedCommentView` (collapsible).
+ - Add components for `DiffView` (file with side-by-side diff, can click any line to comment).
  - Add "checklist" reminders for reviewing.
  
 ## Auth
  - Swap to using actual OAuth2 auth flows rather than expect the user to do the dance and splat to the input box.
  
 ## API
- - Add classes for `PullRequest`, `Comment`, `Diff`, `Commit`, `GithubUser` and actually model threading/comment resolution correctly.
+ - Add classes for `PullRequest`, `Diff` and actually model threading/comment resolution correctly.
+ - Need to find out how to get at "when was this pushed" to generate revision numbers 1, 2, 3, ...
 
 ## Bitty things
  - Put the repo/PR# into a URL fragment and allow back button navigation to go back a PR?
