@@ -31,6 +31,11 @@ blockquote {
     border-left: 4px solid #ddd;
 }
 
+table {
+    border-spacing: 0px;
+    border-collapse: separate;
+}
+
 .inline_code { /* For the main commit title mainly */
     font-family: "Lucida Console", Monaco, monospace;
     color: #336677;
@@ -206,4 +211,23 @@ blockquote {
     padding: 3px;
     margin-right: 5px;
     background-color: #ddd
+}
+
+
+.PatchView {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    white-space: pre;
+}
+
+
+.Patch_type_add {
+    background-color: #eaffea
+}
+
+.Patch_type_del {
+    background-color: #ffecec
+}
+
+.Patch_type_hunk {
+    color: #aaa;
 }
