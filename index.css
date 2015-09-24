@@ -32,8 +32,16 @@ blockquote {
 }
 
 table {
-    border-spacing: 0px;
-    border-collapse: separate;
+    border: none;
+    border-collapse: collapse;
+}
+table td {
+    border-left: 1px solid #000;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+table td:first-child {
+    border-left: none;
 }
 
 .inline_code { /* For the main commit title mainly */
