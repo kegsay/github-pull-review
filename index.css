@@ -149,3 +149,61 @@ blockquote {
     height: 1em;
     padding-top: 0.5em;
 }
+
+
+.FileDiffView {
+    border: 1px solid black;
+}
+
+.FileDiffView_header {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.FileDiffView_header_status {
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+}
+
+.FileDiffView_header_status_added {
+    background-color: #090
+}
+
+.FileDiffView_header_status_renamed {
+    background-color: #ddd
+}
+
+.FileDiffView_header_status_modified {
+    background-color: #000
+}
+
+.FileDiffView_header_path {
+
+}
+
+.FileDiffView_header_counts {
+    float: right;
+}
+
+.FileDiffView_counts_additions {
+    padding: 3px;
+    margin-right: 5px;
+    background-color: #dfd
+}
+
+.FileDiffView_counts_deletions {
+    padding: 3px;
+    margin-right: 5px;
+    background-color: #fdd
+}
+
+.FileDiffView_counts_changes {
+    padding: 3px;
+    margin-right: 5px;
+    background-color: #ddd
+}
