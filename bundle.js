@@ -343,7 +343,8 @@ module.exports = React.createClass({displayName: 'FileDiffView',
 
     getInitialState: function() {
         return {
-            visible: true
+            visible: true,
+            unified: false
         };
     },
 
@@ -353,13 +354,22 @@ module.exports = React.createClass({displayName: 'FileDiffView',
         });
     },
 
+    toggleUnified: function() {
+        this.setState({
+            unified: !this.state.unified
+        });
+    },
+
     render: function() {
         var diff = this.props.diff;
         var visibleText = this.state.visible ? "Hide" : "Show";
-        var patchElement, visibilityButton;
+        var unifyText = this.state.unified ? "Side-by-Side" : "Unified";
+        var patchElement, visibilityButton, patchButton;
 
         if (this.state.visible) {
-            patchElement = React.createElement(PatchView, {patch: diff.getPatch()});
+            patchElement = (
+                React.createElement(PatchView, {patch: diff.getPatch(), unified: this.state.unified})
+            );
         }
 
         if (diff.getPatch()) {
@@ -367,6 +377,12 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                 React.createElement("button", {className: "FileDiffView_show_hide_button", 
                     onClick: this.toggleVisible}, 
                     visibleText
+                )
+            );
+            patchButton = (
+                React.createElement("button", {className: "FileDiffView_unify_button", 
+                    onClick: this.toggleUnified}, 
+                    unifyText
                 )
             );
         }
@@ -385,6 +401,7 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                         diff.getFilePathString()
                     ), 
                     visibilityButton, 
+                    patchButton, 
                     React.createElement("div", {className: "FileDiffView_header_counts"}, 
                         React.createElement("span", {className: "FileDiffView_counts_additions"}, 
                             diff.getAddCount(), "++"
@@ -510,6 +527,7 @@ module.exports = React.createClass({displayName: 'PatchView',
 
     render: function() {
         var patch = this.props.patch;
+        var unified = this.props.unified;
         if (!patch) {
             // possible for renamed files with no diffs.
             return (
@@ -519,7 +537,7 @@ module.exports = React.createClass({displayName: 'PatchView',
 
         return (
             React.createElement("div", {className: "PatchView"}, 
-                patch.getSideBySideDiffJsx()
+                unified ? patch.getUnifiedDiffJsx() : patch.getSideBySideDiffJsx()
             )
         );
     }
