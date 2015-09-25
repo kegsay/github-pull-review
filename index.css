@@ -166,6 +166,7 @@ table td:first-child {
 
 .FileDiffView {
     border: 1px solid black;
+    margin-top: 10px;
 }
 
 .FileDiffView_header {
@@ -195,12 +196,20 @@ table td:first-child {
     background-color: #000
 }
 
+.FileDiffView_header_status_removed {
+    background-color: #900
+}
+
 .FileDiffView_header_path {
 
 }
 
 .FileDiffView_header_counts {
     float: right;
+}
+
+.FileDiffView_show_hide_button {
+    margin-left: 10px;
 }
 
 .FileDiffView_counts_additions {
