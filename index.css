@@ -32,8 +32,16 @@ blockquote {
 }
 
 table {
-    border-spacing: 0px;
-    border-collapse: separate;
+    border: none;
+    border-collapse: collapse;
+}
+table td {
+    border-left: 1px solid #000;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+table td:first-child {
+    border-left: none;
 }
 
 .inline_code { /* For the main commit title mainly */
@@ -158,6 +166,7 @@ table {
 
 .FileDiffView {
     border: 1px solid black;
+    margin-top: 10px;
 }
 
 .FileDiffView_header {
@@ -187,12 +196,20 @@ table {
     background-color: #000
 }
 
+.FileDiffView_header_status_removed {
+    background-color: #900
+}
+
 .FileDiffView_header_path {
 
 }
 
 .FileDiffView_header_counts {
     float: right;
+}
+
+.FileDiffView_show_hide_button {
+    margin-left: 10px;
 }
 
 .FileDiffView_counts_additions {
@@ -230,4 +247,20 @@ table {
 
 .Patch_type_hunk {
     color: #aaa;
+}
+
+
+.Patch_table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.Patch_table_left {
+    display: block;
+    overflow-x: auto;
+}
+
+.Patch_table_right {
+    display: block;
+    overflow-x: auto;
 }

@@ -341,8 +341,35 @@ var PatchView = require("./patch-view");
 
 module.exports = React.createClass({displayName: 'FileDiffView',
 
+    getInitialState: function() {
+        return {
+            visible: true
+        };
+    },
+
+    toggleVisible: function() {
+        this.setState({
+            visible: !this.state.visible
+        });
+    },
+
     render: function() {
         var diff = this.props.diff;
+        var visibleText = this.state.visible ? "Hide" : "Show";
+        var patchElement, visibilityButton;
+
+        if (this.state.visible) {
+            patchElement = React.createElement(PatchView, {patch: diff.getPatch()});
+        }
+
+        if (diff.getPatch()) {
+            visibilityButton = (
+                React.createElement("button", {className: "FileDiffView_show_hide_button", 
+                    onClick: this.toggleVisible}, 
+                    visibleText
+                )
+            );
+        }
 
         return (
             React.createElement("div", {className: "FileDiffView"}, 
@@ -357,6 +384,7 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                     React.createElement("span", {className: "FileDiffView_header_path"}, 
                         diff.getFilePathString()
                     ), 
+                    visibilityButton, 
                     React.createElement("div", {className: "FileDiffView_header_counts"}, 
                         React.createElement("span", {className: "FileDiffView_counts_additions"}, 
                             diff.getAddCount(), "++"
@@ -369,9 +397,7 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                         )
                     )
                 ), 
-                React.createElement("div", null, 
-                    React.createElement(PatchView, {patch: diff.getPatch()})
-                )
+                patchElement
             )
         );
     }
@@ -493,7 +519,7 @@ module.exports = React.createClass({displayName: 'PatchView',
 
         return (
             React.createElement("div", {className: "PatchView"}, 
-                patch.getUnifiedDiffJsx()
+                patch.getSideBySideDiffJsx()
             )
         );
     }
@@ -1022,7 +1048,6 @@ function DiffController(httpApi) {
 
 DiffController.prototype.getPullRequestDiffs = function(repo, pr) {
     return this.httpApi.getPullRequestDiffs(repo, pr).then(function(response) {
-        console.log(JSON.stringify(response, undefined, 2));
         var diffList = apiMapper.getDiffsFromGithubApi(response.body);
         return diffList;
     });
@@ -1296,7 +1321,8 @@ FileDiff.prototype.getRawPatch = function() {
 FileDiff.STATUS = {
     ADDED: "added",
     RENAMED: "renamed",
-    MODIFIED: "modified"
+    MODIFIED: "modified",
+    REMOVED: "removed"
 };
 FileDiff.STATUSES = Object.keys(FileDiff.STATUS).map(function(k) {
     return FileDiff.STATUS[k];
@@ -1328,6 +1354,40 @@ Patch.prototype.getUnifiedDiffJsx = function() {
     )
 };
 
+Patch.prototype.getSideBySideDiffJsx = function() {
+    var sideBySide = this._calculateSideBySide();
+
+    return (
+        React.createElement("table", {className: "Patch_table"}, React.createElement("tr", null, React.createElement("td", null, 
+            React.createElement("table", {className: "Patch_table_left"}, 
+            React.createElement("tbody", null, 
+            sideBySide.old.map(function(dataLine) {
+                return (
+                    React.createElement("tr", {className: "Patch_type_" + dataLine.type}, 
+                        React.createElement("td", null, dataLine.oldNum), 
+                        React.createElement("td", null, dataLine.raw)
+                    )
+                );
+            })
+            )
+            )
+        ), React.createElement("td", null, 
+            React.createElement("table", {className: "Patch_table_right"}, 
+            React.createElement("tbody", null, 
+            sideBySide.new.map(function(dataLine) {
+                return (
+                    React.createElement("tr", {className: "Patch_type_" + dataLine.type}, 
+                        React.createElement("td", null, dataLine.newNum), 
+                        React.createElement("td", null, dataLine.raw)
+                    )
+                );
+            })
+            )
+            )
+        )))
+    )
+};
+
 /**
  * Convert a raw patch file into an array of objects (one per line) containing
  * parsed information for that line.
@@ -1352,6 +1412,9 @@ Patch.prototype._calculate = function() {
 
         if (lineType === "hunk") {
             var hunkData = /^@@ -(\d+),\d+ \+(\d+),\d+ @@.*/.exec(line);
+            if (!hunkData) {
+                hunkData = /^@@ -(\d+),\d+ \+(\d+) @@.*/.exec(line);
+            }
             currentHunk = {
                 oldLineNo: parseInt(hunkData[1]),
                 newLineNo: parseInt(hunkData[2]),
@@ -1447,6 +1510,112 @@ Patch.prototype._calculate = function() {
 
     return patchData;
 }
+
+Patch.prototype._calculateSideBySide = function() {
+    // Diffs can be split into "only additions", "only deletions" and "both add/del".
+    // For only additions => old file has blank line, new file has addition
+    // For only deletions => old file has deletion, new file has blank line
+    // For both => both sections start on the same line (del=left, add=right),
+    //             mismatched lengths are inserted with blank lines.
+    //
+    // The "both" use case is tricky because we can't do a single sweep to insert
+    // rows (deletions happen first so it'll be treated as "only deletions" until
+    // it sees the "additions" block!). The algorithm we use "looks ahead" on
+    // deletion blocks to see if it is really a "both" block and acts accordingly.
+    var oldFile = [];
+    var newFile = [];
+
+    var inBothBlock = false;
+    var bothBlockAdditionOffset = -1;
+    var bothBlockEndLineNum = -1;
+    // Example Both Block:
+    //    no change
+    //  - first line              no change    |   no change
+    //  - second line           - first line   | + 1st line
+    //  + 1st line       ===>   - second line  | + 2nd line
+    //  + 2nd line                [ blank ]    | + 3rd line
+    //  + 3rd line
+    // bothBlockEndLineNum = 6
+    // bothBlockAdditionOffset = 2 (jump 2 forward to get the addition line)
+    var prevLineType = null;
+    for (var lineNum = 0; lineNum < this.data.length; lineNum++) {
+        var line = this.data[lineNum];
+
+        // check if we should start being in a both block
+        if (!inBothBlock && prevLineType === "nop" && line.type === "del") {
+            bothBlockEndLineNum = -1;
+            // look ahead - we may transition into a both block
+            var seenAddition = false;
+            for (var i = lineNum+1; i < this.data.length; i++) {
+                var nextLine = this.data[i];
+                // a both block has to be a contiguous section of dels/adds
+                if (nextLine.type !== "del" && nextLine.type !== "add") {
+                    bothBlockEndLineNum = i;
+                    break;
+                }
+                // we MUST see an add for this to be a both block (vs just del)
+                if (!seenAddition && nextLine.type === "add") {
+                    bothBlockAdditionOffset = i - lineNum;
+                    seenAddition = true;
+                }
+            }
+
+            if (seenAddition) {
+                if (bothBlockEndLineNum === -1) {
+                    // the both block ends at EOF
+                    bothBlockEndLineNum = this.data.length;
+                }
+                inBothBlock = true;
+            }
+        }
+        // check if we should stop being in a both block
+        else if (inBothBlock && line.type !== "add" && line.type !== "del") {
+            inBothBlock = false;
+        }
+
+        if (inBothBlock) {
+            // dels come first in a del block
+            var delLine = line.type === "del" ? line : { type: "blank", raw: " " };
+            // adds come 2nd, so we need to add the offset
+            var addLine = this.data[lineNum + bothBlockAdditionOffset];
+            // it's possible that 'addLine' is beyond the bounds of the both block
+            if (!addLine || lineNum + bothBlockAdditionOffset >= bothBlockEndLineNum) {
+                addLine = { type: "blank", raw: " "};
+            }
+            // unified diffs are longer than side-by-sides, so we can't just add
+            // lines for each loop we do. They condense in the both block when
+            // there is nothing to add to both tables, so check that here.
+            if (delLine.type === "blank" && addLine.type === "blank") {
+                continue;
+            }
+            oldFile.push(delLine);
+            newFile.push(addLine);
+        }
+        else {
+            switch (line.type) {
+                case "add":
+                    oldFile.push({ type: "blank", raw: " " });
+                    newFile.push(line);
+                    break;
+                case "del":
+                    oldFile.push(line);
+                    newFile.push({ type: "blank", raw: " " });
+                    break;
+                case "nop":
+                case "hunk":
+                    oldFile.push(line);
+                    newFile.push(line);
+                    break;
+            }
+        }
+        prevLineType = line.type;
+    }
+
+    return {
+        "old": oldFile,
+        "new": newFile
+    };
+};
 
 Patch.prototype.getRaw = function() {
     return this.raw;
