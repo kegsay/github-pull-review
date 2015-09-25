@@ -239,3 +239,19 @@ table td:first-child {
 .Patch_type_hunk {
     color: #aaa;
 }
+
+
+.Patch_table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.Patch_table_left {
+    display: block;
+    overflow-x: auto;
+}
+
+.Patch_table_right {
+    display: block;
+    overflow-x: auto;
+}
