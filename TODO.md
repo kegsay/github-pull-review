@@ -29,7 +29,9 @@
       ```
       This neatly sidesteps the problem of revisions (there aren't any) whilst giving people much needed
       context AFTER the comment was made. Plus, the APIs exist such that this isn't too computationally
-      expensive to do.
+      expensive to do. Follow up: We can get the commit when the branch was made via the main PR API `base.sha`. 
+      We can get the current commit hash via `head.sha`, and we know the comment sha, so we're all set to use
+      the `/compare` API to get the diffs. The "slider" for a file then is of size `1+NUM_COMMENTS_ON_DISTINCT_COMMITS`. We still have the problems of threading (the line commented on is often the same but not always obviously) and anchoring old line comments to new commits (if the file is say completely deleted then where do you place the comment?!).
  
 ## Overviews
  - Add new screens for:
