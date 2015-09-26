@@ -31,6 +31,19 @@ blockquote {
     border-left: 4px solid #ddd;
 }
 
+table {
+    border: none;
+    border-collapse: collapse;
+}
+table td {
+    border-left: 1px solid #000;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+table td:first-child {
+    border-left: none;
+}
+
 .inline_code { /* For the main commit title mainly */
     font-family: "Lucida Console", Monaco, monospace;
     color: #336677;
@@ -148,4 +161,112 @@ blockquote {
     color: #777777;
     height: 1em;
     padding-top: 0.5em;
+}
+
+
+.FileDiffView {
+    border: 1px solid black;
+    margin-top: 10px;
+}
+
+.FileDiffView_header {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.FileDiffView_header_status {
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+}
+
+.FileDiffView_header_status_added {
+    background-color: #090
+}
+
+.FileDiffView_header_status_renamed {
+    background-color: #ddd
+}
+
+.FileDiffView_header_status_modified {
+    background-color: #000
+}
+
+.FileDiffView_header_status_removed {
+    background-color: #900
+}
+
+.FileDiffView_header_path {
+
+}
+
+.FileDiffView_header_counts {
+    float: right;
+}
+
+.FileDiffView_show_hide_button {
+    margin-left: 10px;
+}
+
+.FileDiffView_counts_additions {
+    padding: 3px;
+    margin-right: 5px;
+    background-color: #dfd
+}
+
+.FileDiffView_counts_deletions {
+    padding: 3px;
+    margin-right: 5px;
+    background-color: #fdd
+}
+
+.FileDiffView_counts_changes {
+    padding: 3px;
+    margin-right: 5px;
+    background-color: #ddd
+}
+
+
+.PatchView {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    white-space: pre;
+}
+
+.PatchView_highlight_del {
+    background-color: #f8cbcb
+}
+
+.PatchView_highlight_add {
+    background-color: #a6f3a6
+}
+
+.PatchView_type_add {
+    background-color: #eaffea
+}
+
+.PatchView_type_del {
+    background-color: #ffecec
+}
+
+.PatchView_type_hunk {
+    color: #aaa;
+}
+
+.PatchView_table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.PatchView_table_left {
+    display: block;
+    overflow-x: auto;
+}
+
+.PatchView_table_right {
+    display: block;
+    overflow-x: auto;
 }
