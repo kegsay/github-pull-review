@@ -236,31 +236,37 @@ table td:first-child {
     white-space: pre;
 }
 
+.PatchView_highlight_del {
+    background-color: #f8cbcb
+}
 
-.Patch_type_add {
+.PatchView_highlight_add {
+    background-color: #a6f3a6
+}
+
+.PatchView_type_add {
     background-color: #eaffea
 }
 
-.Patch_type_del {
+.PatchView_type_del {
     background-color: #ffecec
 }
 
-.Patch_type_hunk {
+.PatchView_type_hunk {
     color: #aaa;
 }
 
-
-.Patch_table {
+.PatchView_table {
     table-layout: fixed;
     width: 100%;
 }
 
-.Patch_table_left {
+.PatchView_table_left {
     display: block;
     overflow-x: auto;
 }
 
-.Patch_table_right {
+.PatchView_table_right {
     display: block;
     overflow-x: auto;
 }
