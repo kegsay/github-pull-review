@@ -230,6 +230,11 @@ table td:first-child {
     background-color: #ddd
 }
 
+.FileDiffView_counts_comments {
+    padding: 3px;
+    margin-right: 5px;
+}
+
 
 .PatchView {
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
