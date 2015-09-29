@@ -242,6 +242,10 @@ table td:first-child {
     white-space: pre;
 }
 
+.PatchView_line_num {
+    cursor: pointer;
+}
+
 .PatchView_highlight_del {
     background-color: #f8cbcb
 }
