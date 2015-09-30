@@ -125,6 +125,7 @@ table td:first-child {
 
 .CommentView_body {
     padding-left: 15px;
+    background-color: #fff;
 }
 
 
@@ -241,6 +242,10 @@ table td:first-child {
     white-space: pre;
 }
 
+.PatchView_line_num {
+    cursor: pointer;
+}
+
 .PatchView_highlight_del {
     background-color: #f8cbcb
 }
@@ -257,13 +262,19 @@ table td:first-child {
     background-color: #ffecec
 }
 
+.PatchView_type_nop {
+    background-color: #fff
+}
+
 .PatchView_type_hunk {
     color: #aaa;
+    background-color: #fff
 }
 
 .PatchView_table {
     table-layout: fixed;
     width: 100%;
+    background-color: #fafafa
 }
 
 .PatchView_table_left {
