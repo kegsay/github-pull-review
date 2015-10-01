@@ -381,19 +381,135 @@ module.exports = React.createClass({displayName: 'FileDiffListView',
 });
 
 },{"./file-diff-view":8}],8:[function(require,module,exports){
+var dispatcher = require("../logic/dispatcher");
+var actions = require("../logic/actions");
 var PatchView = require("./patch-view");
 var CommentView = require("./comment-view");
+var ActionMixin = require("../logic/actions").ActionMixin([
+    "file_diffs", "get_commit_diffs_response"
+]);
+
+
+function CommitLabel(sha, label) {
+    this.label = label;
+    this.sha = sha;
+}
 
 module.exports = React.createClass({displayName: 'FileDiffView',
+    mixins: [ActionMixin],
 
     getInitialState: function() {
         return {
             visible: true,
             unified: false,
-            from: "BASE",
-            to: "HEAD",
-            showAllComments: false
+            showAllComments: false,
+            commits: [
+                new CommitLabel("base", "BASE"),
+                new CommitLabel("head", "HEAD")
+            ],
+            fromSha: "base",
+            toSha: "head",
+            selectedDiff: null
         };
+    },
+
+    componentDidMount: function() {
+        this._setCommitList(this.props.pr, this.props.comments);
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        this._setCommitList(nextProps.pr, nextProps.comments);
+    },
+
+    _setCommitList: function(pr, comments) {
+        var commits = [
+            new CommitLabel(pr.getBaseSha(), "BASE")
+        ];
+        // convert the list of comments into a Set<CommitLabel> inserted in commits
+        // in chronological order
+        var seenShas = {};
+        seenShas[pr.getBaseSha()] = "yup";
+        comments.forEach(function(comment) {
+            if (seenShas[comment.getSha()]) { return; }
+            var label = comment.getShortSha() + " (" + commits.length + ")";
+            if (comment.getSha() === pr.getHeadSha()) {
+                label = "HEAD";
+            }
+            commits.push(
+                new CommitLabel(comment.getSha(), label)
+            );
+            seenShas[comment.getSha()] = "yup";
+        })
+
+        if (!seenShas[pr.getHeadSha()]) {
+            // add head after all the comment commit labels
+            commits.push(new CommitLabel(pr.getHeadSha(), "HEAD"));
+        }
+        console.log("commits: %s", JSON.stringify(commits));
+        this.setState({
+            commits: commits,
+            fromSha: commits[0].sha,
+            toSha: commits[commits.length - 1].sha
+        });
+    },
+
+    _updateDiff: function(fromSha, toSha) {
+        dispatcher.dispatch(actions.create("get_commit_diffs", {
+            pr: this.props.pr,
+            from: fromSha,
+            to: toSha,
+            file_path: this.props.diff.getFilePathString()
+        }));
+    },
+
+    onCommitChange: function(isFrom, event) {
+        var newSha = event.target.value;
+        var badSha = false;
+        var i;
+        if (isFrom) {
+            // make sure the new sha isn't >= the to sha
+            for (i = 0; i < this.state.commits.length; i++) {
+                if (this.state.commits[i].sha === this.state.toSha) {
+                    badSha = true;
+                    break;
+                }
+                else if (this.state.commits[i].sha === newSha) {
+                    break;
+                }
+            }
+            if (!badSha) {
+                this.setState({fromSha: newSha});
+                this._updateDiff(newSha, this.state.toSha);
+            }
+        }
+        else {
+            // make sure the new sha isn't <= the from sha
+            for (i = this.state.commits.length - 1; i >= 0; i--) {
+                if (this.state.commits[i].sha === this.state.fromSha) {
+                    badSha = true;
+                    break;
+                }
+                else if (this.state.commits[i].sha === newSha) {
+                    break;
+                }
+            }
+            if (!badSha) {
+                this.setState({toSha: newSha});
+                this._updateDiff(this.state.fromSha, newSha);
+            }
+        }
+    },
+
+    onReceiveAction: function(action, data) {
+        if (action !== "get_commit_diffs_response") {
+            return;
+        }
+        if (data.diff.getFilePathString() !== this.props.diff.getFilePathString()) {
+            return;
+        }
+        this.setState({
+            selectedDiff: data.diff
+        });
     },
 
     toggleVisible: function() {
@@ -415,7 +531,9 @@ module.exports = React.createClass({displayName: 'FileDiffView',
     },
 
     render: function() {
+        var self = this;
         var diff = this.props.diff;
+        var selDiff = this.state.selectedDiff || diff;
         var pr = this.props.pr;
         var visibleText = this.state.visible ? "Hide" : "Show";
         var unifyText = this.state.unified ? "Side-by-Side" : "Unified";
@@ -439,11 +557,12 @@ module.exports = React.createClass({displayName: 'FileDiffView',
             );
         }
 
+        
         var commentCount;
         var headComments = [];
         if (this.props.comments.length > 0) {
             headComments = this.props.comments.filter(function(c) {
-                return c.getSha() === pr.getHeadSha();
+                return c.getSha() === self.state.toSha;
             });
 
             commentCount = (
@@ -461,17 +580,12 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                 );
             }
         }
-        this.props.comments.forEach(function(c) {
-            console.log("%s BASE: %s HEAD: %s comment SHA: %s  Comment: %s Line: %s",
-                c.getFilePath(), pr.getBaseSha(), pr.getHeadSha(), c.sha, c.getComment().getBody(),
-                c.patch.getLastLine().getRawLine());
-        });
 
         if (this.state.showAllComments) {
             allCommentsElement = (
                 React.createElement("div", {className: "FileDiffView_all_comments"}, 
                     this.props.comments.filter(function(cmt) {
-                        return cmt.getSha() !== pr.getHeadSha()
+                        return cmt.getSha() !== self.state.toSha
                     }).map(function(cmt, i) {
                         return (
                             React.createElement(CommentView, {comment: cmt, key: i})
@@ -483,9 +597,9 @@ module.exports = React.createClass({displayName: 'FileDiffView',
 
         if (this.state.visible) {
             patchElement = (
-                React.createElement(PatchView, {patch: diff.getPatch(), pr: pr, 
+                React.createElement(PatchView, {patch: selDiff.getPatch(), pr: pr, 
                         unified: this.state.unified, comments: headComments, 
-                        path: diff.getFilePathString()})
+                        path: selDiff.getFilePathString()})
             );
         }
 
@@ -505,22 +619,39 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                     visibilityButton, 
                     patchButton, 
                     React.createElement("div", {className: "FileDiffView_header_counts"}, 
-                        React.createElement("select", null, 
-                            React.createElement("option", {value: "BASE"}, "BASE")
+                        React.createElement("select", {onChange: this.onCommitChange.bind(this, true), value: this.state.fromSha}, 
+                            this.state.commits.map(function(c, i) {
+                                // React whines and says we should use defaultValue/value but:
+                                //  - defaultValue doesn't update (initial load only) which is no good
+                                //    when we get updated props
+                                //  - value needs gut-wrenching the DOM node to set the new value when
+                                //    the user selects a new option.
+                                return (
+                                    React.createElement("option", {value: c.sha}, 
+                                        c.label
+                                    )
+                                );
+                            })
                         ), 
-                        React.createElement("select", null, 
-                            React.createElement("option", {value: "HEAD"}, "HEAD")
+                        React.createElement("select", {onChange: this.onCommitChange.bind(this, false), value: this.state.toSha}, 
+                            this.state.commits.map(function(c, i) {
+                                return (
+                                    React.createElement("option", {value: c.sha}, 
+                                        c.label
+                                    )
+                                );
+                            })
                         ), 
                         otherCommentsButton, 
                         commentCount, 
                         React.createElement("span", {className: "FileDiffView_counts_additions"}, 
-                            diff.getAddCount(), "++"
+                            selDiff.getAddCount(), "++"
                         ), 
                         React.createElement("span", {className: "FileDiffView_counts_deletions"}, 
-                            diff.getRemoveCount(), "--"
+                            selDiff.getRemoveCount(), "--"
                         ), 
                         React.createElement("span", {className: "FileDiffView_counts_changes"}, 
-                            diff.getChangeCount()
+                            selDiff.getChangeCount()
                         )
                     )
                 ), 
@@ -531,7 +662,7 @@ module.exports = React.createClass({displayName: 'FileDiffView',
     }
 });
 
-},{"./comment-view":4,"./patch-view":11}],9:[function(require,module,exports){
+},{"../logic/actions":14,"../logic/dispatcher":18,"./comment-view":4,"./patch-view":11}],9:[function(require,module,exports){
 var dispatcher = require("../logic/dispatcher");
 var SessionStore = require("../logic/session-store");
 var actions = require("../logic/actions");
@@ -1126,6 +1257,15 @@ var actions = {
     },
     line_comments: {
         comments: "object" // actually a list of LineComments
+    },
+    get_commit_diffs: {
+        pr: "object", // PullRequest
+        from: "string", // sha
+        to: "string", // sha
+        file_path: "string"
+    },
+    get_commit_diffs_response: {
+        diff: "object" // FileDiff
     }
 }
 
@@ -1311,12 +1451,7 @@ module.exports.getLineCommentsFromGithubApi = function(apiLineComments) {
     // .original_commit_id => The commit sha when this comment was made.
     // .commit_id => The HEAD commit for this PR (same for all comments)
     // .original_position => The line index in the diff where the comment was made. (0 indexed)
-    console.log(JSON.stringify(apiLineComments, undefined, 2));
     return apiLineComments.map(function(lineComment) {
-        console.log(
-            JSON.stringify(lineComment, undefined, 2)
-        );
-
         return new LineComment(
             lineComment.path,
             toComment(lineComment),
@@ -1355,6 +1490,9 @@ Controller.prototype.onAction = function(payload) {
             break;
         case "token_update":
             this.httpApi.setAccessToken(data.token);
+            break;
+        case "get_commit_diffs":
+            this._get_commit_diffs(data.pr.getRepo(), data.from, data.to, data.file_path);
             break;
         case "post_comment":
             if (data.in_reply_to) {
@@ -1445,6 +1583,26 @@ Controller.prototype._post_line_comment = function(internalCommentId, pr, text, 
             id: pr.getId(),
             allow_cached: false
         }));
+    });
+};
+
+Controller.prototype._get_commit_diffs = function(repo, fromSha, toSha, filePath) {
+    var self = this;
+    Promise.try(function() {
+        return self.httpApi.getCommitDiffs(repo, fromSha, toSha);
+    }).done(function(apiDiffs) {
+        var diffs = apiMapper.getCommitDiffsFromGithubApi(apiDiffs.body);
+        diffs = diffs.filter(function(diff) {
+            return diff.getFilePath() === filePath;
+        });
+        self.dispatcher.dispatch(
+            actions.create("get_commit_diffs_response", {
+                diff: diffs[0]
+            })
+        );
+    }, function(e) {
+        console.error("Failed to get commit diffs on %s between %s and %s", repo, fromSha, toSha);
+        console.error(e.stack);
     });
 };
 
