@@ -240,10 +240,16 @@ table td:first-child {
 .PatchView {
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
     white-space: pre;
+    font-size: 12px;
 }
 
 .PatchView_line_num {
     cursor: pointer;
+    min-width: 50px;
+    width: 2%;
+    white-space: nowrap;
+    color: #555;
+    text-align: right;
 }
 
 .PatchView_highlight_del {
@@ -273,6 +279,7 @@ table td:first-child {
 
 .PatchView_table {
     width: 100%;
-    background-color: #fafafa
+    background-color: #fafafa;
+    table-layout: fixed;
 }
 
