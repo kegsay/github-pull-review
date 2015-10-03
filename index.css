@@ -106,6 +106,9 @@ table td:first-child {
     border-radius: 5px;
     margin-top: 10px;
     margin-left: 64px;
+    font-family: Helvetica, arial;
+    white-space: normal;
+    background-color: #fff;
 }
 
 .CommentView_avatar {
