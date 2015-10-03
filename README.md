@@ -13,6 +13,10 @@ This project aims to fix these issues, whilst maintaining the familiarity, look 
 
 This is all also hosted on [Github pages](http://kegsay.github.io/github-pull-review/) but you can also `git clone` this repo and run it locally.
 
+## Access tokens
+
+You need to provide an access token in order to access the Github APIs. You can create a "Personal Access Token" in your account settings. A token is required in order to leave comments!
+
 ## Building locally
 First, `git clone` this repo. Then:
 
