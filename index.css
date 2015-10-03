@@ -208,6 +208,10 @@ table td:first-child {
 
 }
 
+.FileDiffView_header_select_commit {
+    margin-right: 5px;
+}
+
 .FileDiffView_header_counts {
     float: right;
 }
