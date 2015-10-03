@@ -223,8 +223,12 @@ module.exports = React.createClass({displayName: 'CommentView',
             lineCommentHeader = (
                 React.createElement("span", null, 
                     "(", comment.getShortSha(), ")", 
-                    React.createElement("button", {onClick: this._onToggleCommits.bind(this, true)}, "Prev diffs"), 
-                    React.createElement("button", {onClick: this._onToggleCommits.bind(this, false)}, "Next diffs")
+                    React.createElement("input", {type: "image", src: "base2cmt.png", className: "CommentView_commitToggle", 
+                        title: "View diff when this comment was made", 
+                        onClick: this._onToggleCommits.bind(this, true)}), 
+                    React.createElement("input", {type: "image", src: "cmt2head.png", className: "CommentView_commitToggle", 
+                        title: "View diff after this comment was made", 
+                        onClick: this._onToggleCommits.bind(this, false)})
                 )
             );
             comment = comment.getComment();
@@ -565,6 +569,30 @@ module.exports = React.createClass({displayName: 'FileDiffView',
         });
     },
 
+    onToggleCommits: function(lineComment, wantEarlierCommits) {
+        var commentSha = lineComment.getSha();
+        var latestSha = this.state.commits[this.state.commits.length - 1].sha;
+        var earliestSha = this.state.commits[0].sha;
+        if (earliestSha === commentSha && wantEarlierCommits ||
+                latestSha === commentSha && !wantEarlierCommits) {
+            return; // cannot satisfy.
+        } 
+        if (wantEarlierCommits) {
+            this.setState({
+                fromSha: earliestSha,
+                toSha: commentSha
+            });
+            this._updateDiff(earliestSha, commentSha);
+        }
+        else {
+            this.setState({
+                fromSha: commentSha,
+                toSha: latestSha
+            });
+            this._updateDiff(commentSha, latestSha);
+        }
+    },
+
     render: function() {
         var self = this;
         var diff = this.props.diff;
@@ -622,7 +650,8 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                         return cmt.getSha() !== self.state.toSha
                     }).map(function(cmt, i) {
                         return (
-                            React.createElement(CommentView, {comment: cmt, key: "allcmt" + i})
+                            React.createElement(CommentView, {comment: cmt, key: "allcmt" + i, 
+                                onToggleCommits: self.onToggleCommits.bind(self, cmt)})
                         );
                     })
                 )
@@ -636,7 +665,9 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                     comments: headComments, 
                     showUnified: this.state.unified, 
                     onLineComment: this._onLineComment, 
-                    onReplyToComment: this._onReplyToComment})
+                    onReplyToComment: this._onReplyToComment, 
+                    fileExt: selDiff.getFileExtension(), 
+                    onToggleCommits: self.onToggleCommits})
             );
         }
 
@@ -821,6 +852,7 @@ module.exports = React.createClass({displayName: 'MainPage',
 });
 
 },{"./info-getter":9,"./pull-request-overview":12}],11:[function(require,module,exports){
+// var highlightJs = require("highlight.js");
 var CommentView = require("./comment-view");
 var CommentBox = require("./comment-box");
 var Patch = require("../logic/models/patch");
@@ -831,14 +863,38 @@ module.exports = React.createClass({displayName: 'PatchView',
         showUnified: React.PropTypes.bool.isRequired,
         comments: React.PropTypes.array.isRequired,
         patch: React.PropTypes.instanceOf(Patch),
+        fileExt: React.PropTypes.string,
         onLineComment: React.PropTypes.func.isRequired,
-        onReplyToComment: React.PropTypes.func.isRequired
+        onReplyToComment: React.PropTypes.func.isRequired,
+        onToggleCommits: React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
             selectedLines: []
         };
+    },
+
+    getDefaultProps: function() {
+        return {
+            onToggleCommits: function() {}
+        };
+    },
+
+    onToggleCommits: function(cmt, wantPrev) {
+        this.props.onToggleCommits(cmt, wantPrev);
+    },
+
+    componentDidUpdate: function() {
+        /* FIXME: This needs to be multiline for correct highlighting (e.g. block comments)
+        if (!this.refs.mainView) { return; }
+        var mainDomNode = React.findDOMNode(this.refs.mainView);
+        if (!mainDomNode) { return; }
+        var elements = mainDomNode.getElementsByClassName(this.props.fileExt);
+        for (var i = 0; i < elements.length; i++) {
+            highlightJs.highlightBlock(elements[i]);
+        }
+        */
     },
 
     _onLineComment: function(selectedLine, text) {
@@ -871,15 +927,16 @@ module.exports = React.createClass({displayName: 'PatchView',
     },
 
     _getLineJsx: function(line) {
+        var fileExt = this.props.fileExt || "";
         var text = (
-            React.createElement("td", {className: "PatchView_type_" + line.getType()}, 
+            React.createElement("td", {className: fileExt + " PatchView_type_" + line.getType()}, 
             line.getRawLine()
             )
         );
         if (line.hasHighlightedSection()) {
             var sections = line.getHighlightedSections();
             text = (
-                React.createElement("td", {className: "PatchView_type_" + line.getType()}, 
+                React.createElement("td", {className: fileExt +" PatchView_type_" + line.getType()}, 
                     sections[0], 
                     React.createElement("span", {className: "PatchView_highlight_" + line.getType()}, 
                         sections[1]
@@ -965,7 +1022,8 @@ module.exports = React.createClass({displayName: 'PatchView',
                         React.createElement("td", null), 
                         React.createElement("td", null), 
                         React.createElement("td", null, 
-                            React.createElement(CommentView, {comment: cmt})
+                            React.createElement(CommentView, {comment: cmt, 
+                                onToggleCommits: self.onToggleCommits.bind(self, cmt)})
                         )
                     )
                 );
@@ -1061,7 +1119,8 @@ module.exports = React.createClass({displayName: 'PatchView',
                         // CommentView!)
                         self, leftComments[leftComments.length - 2])});
                 }
-                return React.createElement(CommentView, {comment: cmt});
+                return React.createElement(CommentView, {comment: cmt, 
+                            onToggleCommits: self.onToggleCommits.bind(self, cmt)});
             });
             rightComments = rightComments.map(function(cmt) {
                 if (cmt === "box") {
@@ -1069,7 +1128,8 @@ module.exports = React.createClass({displayName: 'PatchView',
                         onSubmit: self._onReplyToComment.bind(
                         self, rightComments[rightComments.length - 2])});
                 }
-                return React.createElement(CommentView, {comment: cmt});
+                return React.createElement(CommentView, {comment: cmt, 
+                            onToggleCommits: self.onToggleCommits.bind(self, cmt)});
             });
 
             var numRowsToAdd = Math.max(leftComments.length, rightComments.length);
@@ -1105,7 +1165,7 @@ module.exports = React.createClass({displayName: 'PatchView',
         }
 
         return (
-            React.createElement("div", {className: "PatchView"}, 
+            React.createElement("div", {className: "PatchView", ref: "mainView"}, 
                 showUnified ? this.getUnifiedDiffJsx(patch) : this.getSideBySideDiffJsx(patch)
             )
         );
@@ -2002,6 +2062,14 @@ function FileDiff(filePath, status, patch, lineCounts, prevFilename, link) {
         this.patch = new Patch(patch);
     }
 }
+
+FileDiff.prototype.getFileExtension = function() {
+    if (!this.file || this.file.indexOf(".") === -1) {
+        return null;
+    }
+    var segments = this.file.split(".");
+    return segments[segments.length-1];
+};
 
 FileDiff.prototype.getLink = function() {
     return this.link;

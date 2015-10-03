@@ -131,6 +131,15 @@ table td:first-child {
     background-color: #fff;
 }
 
+.CommentView_commitToggle {
+    vertical-align: middle;
+    margin-left: 5px;
+    margin-right: 5px;
+    background-image: linear-gradient(#fcfcfc, #eee);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
 
 
 .CommitView {
@@ -255,7 +264,7 @@ table td:first-child {
     min-width: 50px;
     width: 2%;
     white-space: nowrap;
-    color: #555;
+    color: #888;
     text-align: right;
 }
 
