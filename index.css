@@ -106,6 +106,9 @@ table td:first-child {
     border-radius: 5px;
     margin-top: 10px;
     margin-left: 64px;
+    font-family: Helvetica, arial;
+    white-space: normal;
+    background-color: #fff;
 }
 
 .CommentView_avatar {
@@ -205,6 +208,10 @@ table td:first-child {
 
 }
 
+.FileDiffView_header_select_commit {
+    margin-right: 5px;
+}
+
 .FileDiffView_header_counts {
     float: right;
 }
@@ -240,10 +247,16 @@ table td:first-child {
 .PatchView {
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
     white-space: pre;
+    font-size: 12px;
 }
 
 .PatchView_line_num {
     cursor: pointer;
+    min-width: 50px;
+    width: 2%;
+    white-space: nowrap;
+    color: #555;
+    text-align: right;
 }
 
 .PatchView_highlight_del {
@@ -272,17 +285,8 @@ table td:first-child {
 }
 
 .PatchView_table {
-    table-layout: fixed;
     width: 100%;
-    background-color: #fafafa
+    background-color: #fafafa;
+    table-layout: fixed;
 }
 
-.PatchView_table_left {
-    display: block;
-    overflow-x: auto;
-}
-
-.PatchView_table_right {
-    display: block;
-    overflow-x: auto;
-}

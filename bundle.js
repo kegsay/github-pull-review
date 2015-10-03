@@ -28,7 +28,7 @@ if (window.location.hash) {
 }
 
 React.render(
-    React.createElement(MainPage),
+    React.createElement(MainPage, {controller: ctrl}),
     document.getElementById("container")
 );
 
@@ -38,11 +38,6 @@ module.exports = {
 
 },{"./components/main-page":10,"./logic/controller":16,"./logic/diff-controller":17,"./logic/dispatcher":18,"./logic/github-api":19,"./logic/session-store":28,"./logic/uri":29}],2:[function(require,module,exports){
 var highlightJs = require("highlight.js");
-var ActionMixin = require("../logic/actions").ActionMixin([
-    "post_comment_response"
-]);
-var dispatcher = require("../logic/dispatcher");
-var actions = require("../logic/actions");
 var utils = require("./utils");
 
 var oneLiners = [
@@ -53,95 +48,83 @@ var oneLiners = [
 ];
 
 module.exports = React.createClass({displayName: 'CommentBox',
-    mixins: [ActionMixin],
+    propTypes: {
+        onSubmit: React.PropTypes.func.isRequired
+    },
 
     getInitialState: function() {
         return {
-            view: "write",
-            sending_id: null,
-            txt: "",
+            shouldPreview: false,
+            submitting: false,
+            inputText: "",
             placeholder: oneLiners[
                 Math.floor(Math.random() * oneLiners.length)
             ]
         };
     },
 
-    onReceiveAction: function(action, data) {
-        if (action !== "post_comment_response") {
-            return;
-        }
-        if (data.comment_id === this.state.sending_id) {
-            this.setState({
-                sending_id: null,
-                txt: ""
-            });
-        }
-    },
-
     componentDidUpdate: function() {
         if (this.refs.preview) {
             var node = React.findDOMNode(this.refs.preview);
-            highlightJs.highlightBlock(node);
+            var preBlocks = node.getElementsByTagName("pre");
+            for (var i = 0; i < preBlocks.length; i++) {
+                var codeBlocks = preBlocks[i].getElementsByTagName("code");
+                for (var j = 0; j < codeBlocks.length; j++) {
+                     highlightJs.highlightBlock(codeBlocks[i]);
+                }
+            }
         }
     },
 
-    onWrite: function() {
-        this.setState({ view: "write" });
-    },
-
-    onPreview: function() {
-        this.setState({ view: "preview" });
+    onPreview: function(shouldPreview) {
+        this.setState({ shouldPreview: shouldPreview });
     },
 
     onSubmit: function() {
-        var commentId = "" + Date.now();
-        this.setState({
-            sending_id: commentId
+        var self = this;
+        this.setState({ submitting: true });
+        this.props.onSubmit(this.state.inputText).done(function(a) {
+            self.setState({
+                inputText: "",
+                submitting: false
+            });
+        }, function(err) {
+            console.error("Failed to submit comment: %s", err);
+            self.setState({
+                submitting: false
+            });
         });
-        dispatcher.dispatch(actions.create("post_comment", {
-            text: this.state.txt,
-            comment_id: commentId,
-            in_reply_to: this.props.in_reply_to,
-            line: this.props.line,
-            pr: this.props.pr,
-            path: this.props.path,
-            pos: this.props.pos
-        }));
     },
 
     onChangeText: function(event) {
-        this.setState({txt: event.target.value});
+        this.setState({inputText: event.target.value});
     },
 
     render: function() {
         var mainArea;
-        if (this.state.view === "write") {
-            var disableTextEntry = (
-                this.state.sending_id !== null
-            );
-            mainArea = (
-                React.createElement("textarea", {className: "CommentBox_textarea", 
-                    placeholder: this.state.placeholder, 
-                    onChange: this.onChangeText, 
-                    value: this.state.txt, 
-                    disabled: disableTextEntry})
-            );
-        }
-        else {
-            var markdownHtml = utils.markdownToHtml(this.state.txt);
+        if (this.state.shouldPreview) {
+            var markdownHtml = utils.markdownToHtml(this.state.inputText);
             mainArea = (
                 React.createElement("div", {className: "CommentBox_preview", ref: "preview", 
                     dangerouslySetInnerHTML: {__html: markdownHtml}}
                 )
             );
         }
-
+        else {
+            mainArea = (
+                React.createElement("textarea", {className: "CommentBox_textarea", 
+                    placeholder: this.state.placeholder, 
+                    onChange: this.onChangeText, 
+                    value: this.state.inputText, 
+                    disabled: this.state.submitting})
+            );
+        }
 
         return (
             React.createElement("div", null, 
             React.createElement("div", null, 
-                React.createElement("button", {onClick: this.onWrite}, "Write"), 
-                React.createElement("button", {onClick: this.onPreview}, "Preview")
+                React.createElement("button", {onClick: this.onPreview.bind(this, false)}, "Write"), 
+                React.createElement("button", {onClick: this.onPreview.bind(this, true)}, "Preview")
             ), 
             mainArea, 
             React.createElement("div", null, 
@@ -152,19 +135,44 @@ module.exports = React.createClass({displayName: 'CommentBox',
     }
 });
 
-},{"../logic/actions":14,"../logic/dispatcher":18,"./utils":13,"highlight.js":237}],3:[function(require,module,exports){
+},{"./utils":13,"highlight.js":237}],3:[function(require,module,exports){
 var CommentView = require("./comment-view");
 var CommentBox = require("./comment-box");
+var Promise = require("bluebird");
 
 module.exports = React.createClass({displayName: 'CommentListView',
+    propTypes: {
+        comments: React.PropTypes.array.isRequired,
+        showCommentBox: React.PropTypes.bool.isRequired,
+        onSubmitComment: React.PropTypes.func
+    },
+
+    getDefaultProps: function() {
+        return {
+            onSubmitComment: function(text) {
+                console.log("onSubmitComment: " + text);
+                return Promise.reject("No onSubmitComment provided");
+            },
+            showCommentBox: false,
+            comments: []
+        };
+    },
+
+    onSubmitComment: function(text) {
+        return this.props.onSubmitComment(text);
+    },
 
     render: function() {
-        if (!this.props.comments || this.props.comments.length === 0) {
+        if (this.props.comments.length === 0) {
             return (
                 React.createElement("div", null, 
                     "No comments yet."
                 )
             );
+        }
+        var commentBox;
+        if (this.props.showCommentBox) {
+            commentBox = React.createElement(CommentBox, {onSubmit: this.onSubmitComment});
         }
         return (
             React.createElement("div", null, 
@@ -175,29 +183,30 @@ module.exports = React.createClass({displayName: 'CommentListView',
                     );
                 })
                 ), 
-                React.createElement(CommentBox, {pr: this.props.pr})
+                commentBox
             )
         );
 
     }
 });
 
-},{"./comment-box":2,"./comment-view":4}],4:[function(require,module,exports){
+},{"./comment-box":2,"./comment-view":4,"bluebird":30}],4:[function(require,module,exports){
 "use strict";
 var LineComment = require("../logic/models/line-comment");
 
 module.exports = React.createClass({displayName: 'CommentView',
-
-    _emitDiff: function(direction) {
-
+    propTypes: {
+        onToggleCommits: React.PropTypes.func
     },
 
-    onPrevDiffs: function() {
-        this._emitDiff("prev");
+    getDefaultProps: function() {
+        return {
+            onToggleCommits: function() {}
+        };
     },
 
-    onNextDiffs: function() {
-        this._emitDiff("next");
+    _onToggleCommits: function(wantEarlierCommits) {
+        this.props.onToggleCommits(wantEarlierCommits);
     },
 
     render: function() {
@@ -214,8 +223,8 @@ module.exports = React.createClass({displayName: 'CommentView',
             lineCommentHeader = (
                 React.createElement("span", null, 
                     "(", comment.getShortSha(), ")", 
-                    React.createElement("button", {onClick: this.onPrevDiffs}, "Prev diffs"), 
-                    React.createElement("button", {onClick: this.onNextDiffs}, "Next diffs")
+                    React.createElement("button", {onClick: this._onToggleCommits.bind(this, true)}, "Prev diffs"), 
+                    React.createElement("button", {onClick: this._onToggleCommits.bind(this, false)}, "Next diffs")
                 )
             );
             comment = comment.getComment();
@@ -350,6 +359,10 @@ module.exports = React.createClass({displayName: 'CommitView',
 var FileDiffView = require("./file-diff-view");
 
 module.exports = React.createClass({displayName: 'FileDiffListView',
+    propTypes: {
+        onReplyToComment: React.PropTypes.func.isRequired,
+        onLineComment: React.PropTypes.func.isRequired
+    },
 
     render: function() {
         if (!this.props.diffs || this.props.diffs.length === 0) {
@@ -370,8 +383,13 @@ module.exports = React.createClass({displayName: 'FileDiffListView',
                         return cmt.getFilePath() === diff.getFilePath();
                     });
                     return (
-                        React.createElement(FileDiffView, {diff: diff, comments: fileComments, 
-                            pr: self.props.pr, key: i})
+                        React.createElement(FileDiffView, {
+                            diff: diff, 
+                            comments: fileComments, 
+                            pr: self.props.pr, 
+                            onReplyToComment: self.props.onReplyToComment, 
+                            onLineComment: self.props.onLineComment, 
+                            key: i})
                     );
                 })
                 )
@@ -398,6 +416,11 @@ function CommitLabel(sha, label) {
 module.exports = React.createClass({displayName: 'FileDiffView',
     mixins: [ActionMixin],
 
+    propTypes: {
+        onReplyToComment: React.PropTypes.func.isRequired,
+        onLineComment: React.PropTypes.func.isRequired
+    },
+
     getInitialState: function() {
         return {
             visible: true,
@@ -419,6 +442,18 @@ module.exports = React.createClass({displayName: 'FileDiffView',
 
     componentWillReceiveProps: function(nextProps) {
         this._setCommitList(nextProps.pr, nextProps.comments);
+    },
+
+    _onLineComment: function(pos, text) {
+        return this.props.onLineComment(
+            this.props.diff.getFilePathString(), pos, text
+        );
+    },
+
+    _onReplyToComment: function(lineComment, text) {
+        return this.props.onReplyToComment(
+            this.props.diff.getFilePathString(), lineComment, text
+        );
     },
 
     _setCommitList: function(pr, comments) {
@@ -534,7 +569,6 @@ module.exports = React.createClass({displayName: 'FileDiffView',
         var self = this;
         var diff = this.props.diff;
         var selDiff = this.state.selectedDiff || diff;
-        var pr = this.props.pr;
         var visibleText = this.state.visible ? "Hide" : "Show";
         var unifyText = this.state.unified ? "Side-by-Side" : "Unified";
         var otherCommentsText = (
@@ -557,7 +591,7 @@ module.exports = React.createClass({displayName: 'FileDiffView',
             );
         }
 
-        
+
         var commentCount;
         var headComments = [];
         if (this.props.comments.length > 0) {
@@ -588,7 +622,7 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                         return cmt.getSha() !== self.state.toSha
                     }).map(function(cmt, i) {
                         return (
-                            React.createElement(CommentView, {comment: cmt, key: i})
+                            React.createElement(CommentView, {comment: cmt, key: "allcmt" + i})
                         );
                     })
                 )
@@ -597,9 +631,12 @@ module.exports = React.createClass({displayName: 'FileDiffView',
 
         if (this.state.visible) {
             patchElement = (
-                React.createElement(PatchView, {patch: selDiff.getPatch(), pr: pr, 
-                        unified: this.state.unified, comments: headComments, 
-                        path: selDiff.getFilePathString()})
+                React.createElement(PatchView, {
+                    patch: selDiff.getPatch(), 
+                    comments: headComments, 
+                    showUnified: this.state.unified, 
+                    onLineComment: this._onLineComment, 
+                    onReplyToComment: this._onReplyToComment})
             );
         }
 
@@ -614,18 +651,17 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                         diff.getStatusString()
                     ), 
                     React.createElement("span", {className: "FileDiffView_header_path"}, 
-                        diff.getFilePathString()
+                        React.createElement("a", {href: diff.getLink(), target: "_blank"}, 
+                            diff.getFilePathString()
+                        )
                     ), 
                     visibilityButton, 
                     patchButton, 
                     React.createElement("div", {className: "FileDiffView_header_counts"}, 
-                        React.createElement("select", {onChange: this.onCommitChange.bind(this, true), value: this.state.fromSha}, 
+                        React.createElement("select", {className: "FileDiffView_header_select_commit", 
+                                onChange: this.onCommitChange.bind(this, true), 
+                                value: this.state.fromSha}, 
                             this.state.commits.map(function(c, i) {
-                                // React whines and says we should use defaultValue/value but:
-                                //  - defaultValue doesn't update (initial load only) which is no good
-                                //    when we get updated props
-                                //  - value needs gut-wrenching the DOM node to set the new value when
-                                //    the user selects a new option.
                                 return (
                                     React.createElement("option", {value: c.sha}, 
                                         c.label
@@ -633,7 +669,9 @@ module.exports = React.createClass({displayName: 'FileDiffView',
                                 );
                             })
                         ), 
-                        React.createElement("select", {onChange: this.onCommitChange.bind(this, false), value: this.state.toSha}, 
+                        React.createElement("select", {className: "FileDiffView_header_select_commit", 
+                                onChange: this.onCommitChange.bind(this, false), 
+                                value: this.state.toSha}, 
                             this.state.commits.map(function(c, i) {
                                 return (
                                     React.createElement("option", {value: c.sha}, 
@@ -753,12 +791,30 @@ var InfoGetter = require("./info-getter");
 var PullRequestOverview = require("./pull-request-overview");
 
 module.exports = React.createClass({displayName: 'MainPage',
+    propTypes: {
+        controller: React.PropTypes.any
+    },
+
+    onSubmitOverviewComment: function(pr, text) {
+        return this.props.controller.postOverviewComment(pr, text)
+    },
+
+    onReplyToComment: function(pr, path, lineComment, text) {
+        return this.props.controller.postReplyLineComment(pr, text, lineComment);
+    },
+
+    onSubmitLineComment: function(pr, path, pos, text) {
+        return this.props.controller.postLineComment(pr, text, path, pos);
+    },
 
     render: function() {
         return (
             React.createElement("div", null, 
                 React.createElement(InfoGetter, null), 
-                React.createElement(PullRequestOverview, null)
+                React.createElement(PullRequestOverview, {
+                    onSubmitOverviewComment: this.onSubmitOverviewComment, 
+                    onReplyToComment: this.onReplyToComment, 
+                    onSubmitLineComment: this.onSubmitLineComment})
             )
         );
     }
@@ -767,13 +823,35 @@ module.exports = React.createClass({displayName: 'MainPage',
 },{"./info-getter":9,"./pull-request-overview":12}],11:[function(require,module,exports){
 var CommentView = require("./comment-view");
 var CommentBox = require("./comment-box");
+var Patch = require("../logic/models/patch");
+var Line = require("../logic/models/line");
 
 module.exports = React.createClass({displayName: 'PatchView',
+    propTypes: {
+        showUnified: React.PropTypes.bool.isRequired,
+        comments: React.PropTypes.array.isRequired,
+        patch: React.PropTypes.instanceOf(Patch),
+        onLineComment: React.PropTypes.func.isRequired,
+        onReplyToComment: React.PropTypes.func.isRequired
+    },
 
     getInitialState: function() {
         return {
             selectedLines: []
         };
+    },
+
+    _onLineComment: function(selectedLine, text) {
+        var self = this;
+        return this.props.onLineComment(selectedLine.pos, text).then(function(res) {
+            // if it is submitted then de-select this line (technically this is a toggle)
+            self.onLineClick(selectedLine.line, selectedLine.isOldFile);
+            return res;
+        });
+    },
+
+    _onReplyToComment: function(inReplyTo, text) {
+        return this.props.onReplyToComment(inReplyTo, text);
     },
 
     _getSelectedLine: function(line, isOldFile) {
@@ -793,11 +871,15 @@ module.exports = React.createClass({displayName: 'PatchView',
     },
 
     _getLineJsx: function(line) {
-        var text = React.createElement("td", null, line.getRawLine());
+        var text = (
+            React.createElement("td", {className: "PatchView_type_" + line.getType()}, 
+            line.getRawLine()
+            )
+        );
         if (line.hasHighlightedSection()) {
             var sections = line.getHighlightedSections();
             text = (
-                React.createElement("td", null, 
+                React.createElement("td", {className: "PatchView_type_" + line.getType()}, 
                     sections[0], 
                     React.createElement("span", {className: "PatchView_highlight_" + line.getType()}, 
                         sections[1]
@@ -809,78 +891,12 @@ module.exports = React.createClass({displayName: 'PatchView',
         return text;
     },
 
-    _getLineCommentJsx: function(lineComment, key) {
-        return (
-            React.createElement(CommentView, {comment: lineComment, key: key})
-        );
-    },
-
-    _addCommentBox: function(table, isUnified, selectedLine, inReplyTo, hiddenStyle) {
-        var extraCol = isUnified ? React.createElement("td", null) : null;
-        selectedLine = selectedLine || {};
-        inReplyTo = inReplyTo || null;
-        table.push(
-            React.createElement("tr", null, 
-            React.createElement("td", null), 
-            extraCol, 
-            React.createElement("td", {style: hiddenStyle}, 
-                React.createElement(CommentBox, {pr: this.props.pr, line: selectedLine.line, 
-                    in_reply_to: inReplyTo, path: this.props.path, 
-                    pos: selectedLine.pos})
-            )
-            )
-        );
-    },
-
-    _addLineComments: function(line, table, isUnified, otherTableLine) {
+    _getLineComments: function(line, isUnified) {
         var self = this;
         var commentsOnLine = self.props.comments.filter(function(lineComment) {
             return lineComment.isOnLine(line, isUnified);
         });
-        if (commentsOnLine.length > 0 && isUnified) {
-            commentsOnLine.forEach(function(cmt, i) {
-                table.push(
-                    React.createElement("tr", null, 
-                        React.createElement("td", null), 
-                        React.createElement("td", null), 
-                        React.createElement("td", null, 
-                            self._getLineCommentJsx(cmt, i)
-                        )
-                    )
-                );
-            });
-            self._addCommentBox(
-                table, isUnified, null, commentsOnLine[commentsOnLine.length - 1]
-            );
-        }
-        else if (!isUnified) {
-            var commentsOnOtherTable = self.props.comments.filter(function(lineComment) {
-                return lineComment.isOnLine(otherTableLine, isUnified);
-            });
-
-            var comments = commentsOnLine.length > 0 ? commentsOnLine : commentsOnOtherTable;
-            var hidden;
-            if (commentsOnLine.length === 0) {
-                hidden = {
-                    visibility: "hidden"
-                };
-            }
-            comments.forEach(function(cmt, i) {
-                table.push(
-                    React.createElement("tr", null, 
-                        React.createElement("td", null), 
-                        React.createElement("td", {style: hidden}, 
-                            self._getLineCommentJsx(cmt, i)
-                        )
-                    )
-                );
-            });
-            if (comments.length > 0) {
-                self._addCommentBox(
-                    table, isUnified, null, comments[comments.length - 1], hidden
-                );
-            }
-        }
+        return commentsOnLine;
     },
 
     onLineClick: function(line, isOldFile) {
@@ -914,7 +930,6 @@ module.exports = React.createClass({displayName: 'PatchView',
         // add in extra rows for comments - we need to do this via tableLines indirection
         // to get around React's "return one top level element please" rule
         patch.getUnifiedData().forEach(function(line, i) {
-            var text = self._getLineJsx(line);
             tableLines.push(
                 React.createElement("tr", {className: "PatchView_type_" + line.getType(), key: i}, 
                     React.createElement("td", {className: "PatchView_line_num", 
@@ -925,22 +940,56 @@ module.exports = React.createClass({displayName: 'PatchView',
                         onClick: self.onLineClick.bind(self, line, false)}, 
                         line.getNewFileLineNum()
                     ), 
-                    text
+                    self._getLineJsx(line)
                 )
             );
+            // potentially add in a selected line comment box
             var selectedLine = self._getSelectedLine(line);
             if (selectedLine) {
-                self._addCommentBox(tableLines, true, selectedLine);
+                tableLines.push(
+                    React.createElement("tr", {key: "box" + i}, 
+                        React.createElement("td", null), 
+                        React.createElement("td", null), 
+                        React.createElement("td", null, 
+                            React.createElement(CommentBox, {
+                            onSubmit: self._onLineComment.bind(self, selectedLine)})
+                        )
+                    )
+                );
             }
-            self._addLineComments(line, tableLines, true);
+            // add line comments
+            var comments = self._getLineComments(line, true);
+            comments.forEach(function(cmt, commentIndex) {
+                tableLines.push(
+                    React.createElement("tr", {key: "cmt" + commentIndex}, 
+                        React.createElement("td", null), 
+                        React.createElement("td", null), 
+                        React.createElement("td", null, 
+                            React.createElement(CommentView, {comment: cmt})
+                        )
+                    )
+                );
+            });
+            if (comments.length > 0) {
+                // add a comment box to reply to this thread
+                tableLines.push(
+                    React.createElement("tr", {key: "reply" + i}, 
+                        React.createElement("td", null), 
+                        React.createElement("td", null), 
+                        React.createElement("td", null, 
+                            React.createElement(CommentBox, {
+                            onSubmit: self._onReplyToComment.bind(
+                                self, comments[comments.length - 1])})
+                        )
+                    )
+                )
+            }
         });
 
         return (
             React.createElement("table", null, 
             React.createElement("tbody", null, 
-            tableLines.map(function(l) {
-                return l;
-            })
+            tableLines.map(function(l) { return l; })
             )
             )
         );
@@ -948,89 +997,106 @@ module.exports = React.createClass({displayName: 'PatchView',
 
     getSideBySideDiffJsx: function(patch) {
         var self = this;
+        var tableLines = [];
+        patch.getSideBySideData().old.forEach(function(leftLine, i) {
+            var rightLine = patch.getSideBySideData().new[i];
+            var leftLineSelected = self._getSelectedLine(leftLine, true);
+            var rightLineSelected = self._getSelectedLine(rightLine, false);
 
-        var leftTableLines = [];
-        var rightTableLines = [];
-
-        // FIXME: Code duplication sadness :(((((
-        // add in extra rows for comments - we need to do this via tableLines indirection
-        // to get around React's "return one top level element please" rule
-        patch.getSideBySideData().old.forEach(function(line, i) {
-            var text = self._getLineJsx(line);
-            leftTableLines.push(
-                React.createElement("tr", {className: "PatchView_type_" + line.getType(), key: i}, 
-                    React.createElement("td", {className: "PatchView_line_num", 
-                            onClick: self.onLineClick.bind(self, line, true)}, 
-                        line.getOldFileLineNum()
-                    ), 
-                    text
+            tableLines.push(
+                React.createElement("tr", {key: i}, 
+                React.createElement("td", {className: "PatchView_line_num PatchView_type_" + leftLine.getType(), 
+                        onClick: self.onLineClick.bind(self, leftLine, true)}, 
+                    leftLine.getOldFileLineNum()
+                ), 
+                self._getLineJsx(leftLine), 
+                React.createElement("td", {className: "PatchView_line_num PatchView_type_" + rightLine.getType(), 
+                        onClick: self.onLineClick.bind(self, rightLine, false)}, 
+                    rightLine.getNewFileLineNum()
+                ), 
+                self._getLineJsx(rightLine)
                 )
             );
-
-            var selectedLine = self._getSelectedLine(line, true);
-            var otherLineSelected = self._getSelectedLine(
-                patch.getSideBySideData().new[i]
-            );
-            if (selectedLine || otherLineSelected) {
-                self._addCommentBox(
-                    leftTableLines, false, selectedLine, null,
-                    (otherLineSelected && !selectedLine) ? {visibility: "hidden"} : undefined
+            // potentially add row for comment box
+            if (leftLineSelected || rightLineSelected) {
+                var oldCommentBox, newCommentBox;
+                if (leftLineSelected) {
+                    oldCommentBox = (
+                        React.createElement(CommentBox, {
+                            onSubmit: self._onLineComment.bind(self, leftLineSelected)})
+                    );
+                }
+                if (rightLineSelected) {
+                    newCommentBox = (
+                        React.createElement(CommentBox, {
+                            onSubmit: self._onLineComment.bind(self, rightLineSelected)})
+                    );
+                }
+                tableLines.push(
+                    React.createElement("tr", {key: "box" + i}, 
+                        React.createElement("td", null), " // line num", 
+                        React.createElement("td", null, " ", oldCommentBox, " "), 
+                        React.createElement("td", null), " // line num", 
+                        React.createElement("td", null, " ", newCommentBox, " ")
+                    )
                 );
             }
+            // add any line comments
+            var leftComments = self._getLineComments(leftLine, false);
+            var rightComments = self._getLineComments(rightLine, false);
+            // NOP lines will have duplicate comments for both left/right, so suppress left.
+            if (leftLine.getType() === Line.TYPE_NOP && rightLine.getType() === Line.TYPE_NOP &&
+                    leftComments.length > 0 && rightComments.length > 0) {
+                leftComments = [];
+            }
+            // convert Comments into CommentViews and tack on CommentBox to ones with comments
+            if (leftComments.length > 0) { leftComments.push("box"); }
+            if (rightComments.length > 0) { rightComments.push("box"); }
+            leftComments = leftComments.map(function(cmt) {
+                if (cmt === "box") {
+                    return React.createElement(CommentBox, {
+                        onSubmit: self._onReplyToComment.bind(
+                        // -2 to get the last real Comment (abit naughty since we rely on this
+                        // not clobbering leftComments immediately else we'd pull out a
+                        // CommentView!)
+                        self, leftComments[leftComments.length - 2])});
+                }
+                return React.createElement(CommentView, {comment: cmt});
+            });
+            rightComments = rightComments.map(function(cmt) {
+                if (cmt === "box") {
+                    return React.createElement(CommentBox, {
+                        onSubmit: self._onReplyToComment.bind(
+                        self, rightComments[rightComments.length - 2])});
+                }
+                return React.createElement(CommentView, {comment: cmt});
+            });
 
-            self._addLineComments(
-                line, leftTableLines, false, patch.getSideBySideData().new[i]
-            );
-        });
-        patch.getSideBySideData().new.forEach(function(line, i) {
-            var text = self._getLineJsx(line);
-            rightTableLines.push(
-                React.createElement("tr", {className: "PatchView_type_" + line.getType(), key: i}, 
-                    React.createElement("td", {className: "PatchView_line_num", 
-                            onClick: self.onLineClick.bind(self, line, false)}, 
-                        line.getNewFileLineNum()
-                    ), 
-                    text
-                )
-            );
-
-            var selectedLine = self._getSelectedLine(line);
-            var otherLineSelected = self._getSelectedLine(
-                patch.getSideBySideData().old[i], true
-            );
-
-            if (selectedLine || otherLineSelected) {
-                self._addCommentBox(
-                    rightTableLines, false, selectedLine, null,
-                    (otherLineSelected && !selectedLine) ? {visibility: "hidden"} : undefined
+            var numRowsToAdd = Math.max(leftComments.length, rightComments.length);
+            for (var j = 0; j < numRowsToAdd; j++) {
+                tableLines.push(
+                    React.createElement("tr", {key: "cmt" + i + "num" + j}, 
+                        React.createElement("td", null), " // line num", 
+                        React.createElement("td", null, " ", leftComments[j], " "), 
+                        React.createElement("td", null), " // line num", 
+                        React.createElement("td", null, " ", rightComments[j], " ")
+                    )
                 );
             }
-
-            self._addLineComments(
-                line, rightTableLines, false, patch.getSideBySideData().old[i]
-            );
         });
 
         return (
-            React.createElement("table", {className: "PatchView_table"}, React.createElement("tr", null, React.createElement("td", null, 
-                React.createElement("table", {className: "PatchView_table_left"}, 
+            React.createElement("table", {className: "PatchView_table"}, 
                 React.createElement("tbody", null, 
-                leftTableLines.map(function(l) { return l; })
+                    tableLines.map(function(l) { return l; })
                 )
-                )
-            ), React.createElement("td", null, 
-                React.createElement("table", {className: "PatchView_table_right"}, 
-                React.createElement("tbody", null, 
-                rightTableLines.map(function(l) {return l; })
-                )
-                )
-            )))
+            )
         )
     },
 
     render: function() {
         var patch = this.props.patch;
-        var unified = this.props.unified;
+        var showUnified = this.props.showUnified;
         if (!patch) {
             // possible for renamed files with no diffs.
             return (
@@ -1040,13 +1106,13 @@ module.exports = React.createClass({displayName: 'PatchView',
 
         return (
             React.createElement("div", {className: "PatchView"}, 
-                unified ? this.getUnifiedDiffJsx(patch) : this.getSideBySideDiffJsx(patch)
+                showUnified ? this.getUnifiedDiffJsx(patch) : this.getSideBySideDiffJsx(patch)
             )
         );
     }
 });
 
-},{"./comment-box":2,"./comment-view":4}],12:[function(require,module,exports){
+},{"../logic/models/line":24,"../logic/models/patch":25,"./comment-box":2,"./comment-view":4}],12:[function(require,module,exports){
 var ActionMixin = require("../logic/actions").ActionMixin([
     "pr_info", "file_diffs", "line_comments"
 ]);
@@ -1057,6 +1123,12 @@ var CommitListView = require("./commit-list-view");
 var FileDiffListView = require("./file-diff-list-view");
 
 module.exports = React.createClass({displayName: 'PullRequestOverview',
+    propTypes: {
+        onSubmitOverviewComment: React.PropTypes.func.isRequired,
+        onReplyToComment: React.PropTypes.func.isRequired,
+        onSubmitLineComment: React.PropTypes.func.isRequired
+    },
+
     mixins: [ActionMixin],
 
     getInitialState: function() {
@@ -1091,6 +1163,18 @@ module.exports = React.createClass({displayName: 'PullRequestOverview',
         this.onView("commits");
     },
 
+    onSubmitOverviewComment: function(text) {
+        return this.props.onSubmitOverviewComment(this.state.pr_info.pr, text);
+    },
+
+    onSubmitReplyToComment: function(path, lineComment, text) {
+        return this.props.onReplyToComment(this.state.pr_info.pr, path, lineComment, text);
+    },
+
+    onSubmitLineComment: function(path, pos, text) {
+        return this.props.onSubmitLineComment(this.state.pr_info.pr, path, pos, text);
+    },
+
     render: function() {
         var pr = this.state.pr_info.pr;
         if (!pr || Object.keys(pr).length === 0) {
@@ -1104,7 +1188,9 @@ module.exports = React.createClass({displayName: 'PullRequestOverview',
             case "diffs":
                 mainSection = (
                     React.createElement(FileDiffListView, {diffs: fileDiffs, comments: lineComments, 
-                        pr: pr})
+                        pr: pr, 
+                        onReplyToComment: this.onSubmitReplyToComment, 
+                        onLineComment: this.onSubmitLineComment})
                 );
                 break;
             case "commits":
@@ -1115,8 +1201,8 @@ module.exports = React.createClass({displayName: 'PullRequestOverview',
                 break;
             case "comments":
                 mainSection = (
-                    React.createElement(CommentListView, {comments: pr.getComments(), 
-                        pr: pr})
+                    React.createElement(CommentListView, {comments: pr.getComments(), showCommentBox: true, 
+                        onSubmitComment: this.onSubmitOverviewComment})
                 );
                 break;
             default:
@@ -1423,6 +1509,7 @@ module.exports.getDiffsFromGithubApi = function(apiDiffs) {
     // .changes => Number of lines changed (== additions for new files)
     // .patch => patch string to apply to the file
     // .previous_filename => Previous file name if any.
+    // .blob_url => link to the file at this commit
     // .sha => SHA for...?
     return apiDiffs.map(function(diff) {
         return new FileDiff(
@@ -1434,7 +1521,8 @@ module.exports.getDiffsFromGithubApi = function(apiDiffs) {
                 deletions: diff.deletions,
                 changes: diff.changes
             },
-            diff.previous_filename
+            diff.previous_filename,
+            diff.blob_url
         );
     });
 };
@@ -1494,27 +1582,6 @@ Controller.prototype.onAction = function(payload) {
         case "get_commit_diffs":
             this._get_commit_diffs(data.pr.getRepo(), data.from, data.to, data.file_path);
             break;
-        case "post_comment":
-            if (data.in_reply_to) {
-                this._post_reply_line_comment(
-                    data.comment_id,
-                    data.pr.getRepo(), data.pr.getId(), data.text,
-                    data.in_reply_to
-                );
-            }
-            else if (data.line) {
-                this._post_line_comment(
-                    data.comment_id,
-                    data.pr, data.text,
-                    data.line,
-                    data.path,
-                    data.pos
-                );
-            }
-            else {
-                this._post_comment(data);
-            }
-            break;
         case "get_diffs":
             this._get_diffs(data);
             this._get_diff_comments(data);
@@ -1525,65 +1592,50 @@ Controller.prototype.onAction = function(payload) {
     }
 };
 
-Controller.prototype._post_comment = function(data) {
+Controller.prototype.postOverviewComment = function(pr, text) {
     var self = this;
-    this.httpApi.postComment(
-        data.repo_id, data.request_id, data.text
-    ).finally(function() {
-        self.dispatcher.dispatch(
-            actions.create("post_comment_response", {
-                comment_id: data.comment_id,
-                response: "",
-                is_error: false
-            })
-        );
-        self.dispatcher.dispatch(actions.create("view_pr", {
-            repo_id: data.repo_id,
-            request_id: data.request_id
-        }));
-    });
+    var promise = this.httpApi.postComment(pr.getRepo(), pr.getId(), text);
+    promise.finally(function() {
+        self._refreshPullRequest(pr);
+    })
+    return promise;
 };
 
-Controller.prototype._post_reply_line_comment = function(internalCommentId, repo,
-                                        reqId, text, inReplyTo) {
-    var self = this;
-    this.httpApi.postLineCommentResponse(
-        repo, reqId, text, inReplyTo.getComment().getId()
-    ).finally(function() {
-        self.dispatcher.dispatch(
-            actions.create("post_comment_response", {
-                comment_id: internalCommentId,
-                response: "",
-                is_error: false
-            })
-        );
-        self.dispatcher.dispatch(actions.create("get_diffs", {
-            repo: repo,
-            id: reqId,
-            allow_cached: false
-        }));
-    });
+Controller.prototype._refreshPullRequest = function(pr) {
+    this.dispatcher.dispatch(actions.create("view_pr", {
+        repo_id: pr.getRepo(),
+        request_id: pr.getId()
+    }));
 };
 
-Controller.prototype._post_line_comment = function(internalCommentId, pr, text, line,
-                                                   path, pos) {
+Controller.prototype.postReplyLineComment = function(pr, text, inReplyTo) {
     var self = this;
-    this.httpApi.postLineComment(
+    var promise = this.httpApi.postLineCommentResponse(
+        pr.getRepo(), pr.getId(), text, inReplyTo.getComment().getId()
+    );
+    promise.finally(function() {
+        self._refreshDiffs(pr);
+    });
+    return promise;
+};
+
+Controller.prototype._refreshDiffs = function(pr) {
+    this.dispatcher.dispatch(actions.create("get_diffs", {
+        repo: pr.getRepo(),
+        id: pr.getId(),
+        allow_cached: false
+    }));
+};
+
+Controller.prototype.postLineComment = function(pr, text, path, pos) {
+    var self = this;
+    var promise = this.httpApi.postLineComment(
         pr.getRepo(), pr.getId(), text, pr.getHeadSha(), path, pos
-    ).finally(function() {
-        self.dispatcher.dispatch(
-            actions.create("post_comment_response", {
-                comment_id: internalCommentId,
-                response: "",
-                is_error: false
-            })
-        );
-        self.dispatcher.dispatch(actions.create("get_diffs", {
-            repo: pr.getRepo(),
-            id: pr.getId(),
-            allow_cached: false
-        }));
+    );
+    promise.finally(function() {
+        self._refreshDiffs(pr);
     });
+    return promise;
 };
 
 Controller.prototype._get_commit_diffs = function(repo, fromSha, toSha, filePath) {
@@ -1922,12 +1974,14 @@ var Patch = require("./patch");
  * @param {number} lineCounts.deletions The number of lines removed.
  * @param {number} lineCounts.changes The number of lines changed.
  * @param {string=} prevFilename Previous file name, if any.
+ * @param {string=} link The link to view the file at this commit.
  */
-function FileDiff(filePath, status, patch, lineCounts, prevFilename) {
+function FileDiff(filePath, status, patch, lineCounts, prevFilename, link) {
     this.rawPatch = patch;
     this.file = filePath;
     this.prevFile = prevFilename;
     this.status = status;
+    this.link = link;
     lineCounts = lineCounts || {
         additions: 0,
         deletions: 0,
@@ -1945,6 +1999,10 @@ function FileDiff(filePath, status, patch, lineCounts, prevFilename) {
         this.patch = new Patch(patch);
     }
 }
+
+FileDiff.prototype.getLink = function() {
+    return this.link;
+};
 
 FileDiff.prototype.getPrevFilePath = function() {
     return this.prevFile;
@@ -2014,7 +2072,7 @@ function LineComment(path, comment, pos, sha, patch) {
 }
 
 LineComment.prototype.isOnLine = function(line, isLineUnified) {
-    var lineInPatch = this.patch.getUnifiedData()[this.position];
+    var lineInPatch = this.patch.getLastLine(); // this.patch.getUnifiedData()[this.position];
     if (!lineInPatch) {
         return false;
     }
