@@ -1888,6 +1888,9 @@ Comment.prototype.getBody = function() {
 };
 
 Comment.prototype.getHtmlBody = function() {
+    if (!this.body) {
+        return "<p><i>No comment provided.</i></p>";
+    }
     return utils.markdownToHtml(this.body);
 };
 
