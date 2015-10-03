@@ -1,7 +1,7 @@
 # Github Pull Review
 *A better way to review pull requests.*
 
-[Try it out!](http://kegsay.github.io/github-pull-review/)
+[Try it out!](http://kegsay.github.io/github-pull-review/#repo=kegsay/matrix-neb&pr=8)
 
 Github's UI for reviewing pull requests isn't great. You can't:
  * Do live code edits to code snippets
