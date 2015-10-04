@@ -305,3 +305,10 @@ table td:first-child {
     table-layout: fixed;
 }
 
+
+
+
+.CommentDiffListView {
+    border: 1px solid;
+    margin: 10px;
+}
