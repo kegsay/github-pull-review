@@ -266,6 +266,12 @@ table td:first-child {
     white-space: nowrap;
     color: #888;
     text-align: right;
+    vertical-align: top; /* for overflowing multi lines */
+}
+
+.PatchView_line_content {
+    word-wrap: break-word;
+    vertical-align: top;
 }
 
 .PatchView_highlight_del {
@@ -299,3 +305,10 @@ table td:first-child {
     table-layout: fixed;
 }
 
+
+
+
+.CommentDiffListView {
+    border: 1px solid;
+    margin: 10px;
+}
