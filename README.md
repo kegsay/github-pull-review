@@ -13,7 +13,7 @@ This project aims to fix these issues, whilst maintaining the familiarity, look 
 
 This is all also hosted on [Github pages](http://kegsay.github.io/github-pull-review/) but you can also `git clone` this repo and run it locally.
 
-## Difference between Github's UI and this
+## Difference between GPR and Github's UI
 
 Currently, GPR does the following over and above Github's UI:
  - Provides buttons along with each line comment to see "this file *when* this comment was made" and "this file *after* this comment was made"
