@@ -97,6 +97,8 @@ table td:first-child {
     line-height: 1.5em;
     min-height: 9em;
     width: 100%;
+    white-space: normal;
+    font-family: Helvetica, arial;
 }
 
 
