@@ -10,6 +10,8 @@
     "highlight.js": "^8.8.0",
     "http-server": "^0.8.0",
     "marked": "^0.3.5",
+    "react": "^0.14.0",
+    "react-router": "^1.0.0-rc3",
     "react-tools": "^0.13.3",
     "request": "^2.62.0",
     "shelljs": "^0.5.3"
