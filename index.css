@@ -314,3 +314,9 @@ table td:first-child {
     border: 1px solid;
     margin: 10px;
 }
+
+
+
+.PullRequestPage_link {
+    padding: 10px;
+}
