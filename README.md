@@ -1,7 +1,7 @@
 # Github Pull Review (GPR)
 *A better way to review pull requests.*
 
-[Try it out!](http://kegsay.github.io/github-pull-review/#repo=kegsay/matrix-neb&pr=8)
+[Try it out!](http://kegsay.github.io/github-pull-review/#/repos/kegsay/matrix-neb/8/diffs)
 
 Github's UI for reviewing pull requests isn't great. You can't:
  * Do live code edits to code snippets
