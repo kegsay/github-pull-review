@@ -20,6 +20,7 @@
   "devDependencies": {
     "eslint": "^1.5.1",
     "eslint-plugin-react": "^3.4.2",
+    "flow": "^0.2.3",
     "parallelshell": "^2.0.0",
     "watchify": "^3.4.0"
   },
