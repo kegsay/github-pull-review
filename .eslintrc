@@ -1,6 +1,9 @@
 {
   "ecmaFeatures": {
-    "jsx": true
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "jsx": true,
+    "templateStrings": true
   },
   "plugins": [ "react" ],
   "env": {
