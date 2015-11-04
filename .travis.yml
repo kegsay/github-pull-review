@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+ - "0.10"
+ - "0.12"
+
+# Don't do submodules since it is a SSH URL and it can't do that
+git:
+  submodules: false
