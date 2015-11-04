@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "babel --presets es2015,react lib/ --out-dir gen/ && browserify -e gen/app.js -o build/bundle.js && shjs build.js",
-    "test": "npm run build",
+    "test": "npm run build && npm run lint",
     "lint": "eslint lib",
     "watch": "parallelshell \"babel --presets es2015,react --watch lib/ --out-dir gen/\" \"watchify -e gen/app.js -o build/bundle.js\""
   },
