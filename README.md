@@ -1,4 +1,6 @@
 # Github Pull Review (GPR)
+[![Build Status](https://travis-ci.org/Kegsay/github-pull-review.svg)](https://travis-ci.org/Kegsay/github-pull-review)
+
 *A better way to review pull requests.*
 
 [Try it out!](http://kegsay.github.io/github-pull-review/#/repos/kegsay/matrix-neb/8/diffs)
