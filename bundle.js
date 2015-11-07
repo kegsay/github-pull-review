@@ -66,7 +66,8 @@ ReactDOM.render(React.createElement(
         { path: "/", component: wrapComponent(RootPage, pageProps) },
         React.createElement(
             Route,
-            { path: "repos/:owner/:repo/:pr", component: wrapComponent(PullRequestPage, pageProps) },
+            { path: "repos/:owner/:repo/:pr",
+                component: wrapComponent(PullRequestPage, pageProps) },
             React.createElement(IndexRoute, { component: wrapComponent(HistoryPage, pageProps) }),
             React.createElement(Route, { path: "commits", component: wrapComponent(CommitsPage, pageProps) }),
             React.createElement(Route, { path: "diffs", component: wrapComponent(DiffsPage, pageProps) }),
@@ -302,7 +303,8 @@ var LineComment = require("../logic/models/line-comment");
 module.exports = React.createClass({ displayName: 'CommentView',
     propTypes: {
         onToggleCommits: React.PropTypes.func,
-        comment: React.PropTypes.any.isRequired
+        comment: React.PropTypes.any.isRequired,
+        onMarkDone: React.PropTypes.func // presence determines checkbox
     },
 
     getDefaultProps: function getDefaultProps() {
@@ -313,6 +315,13 @@ module.exports = React.createClass({ displayName: 'CommentView',
 
     _onToggleCommits: function _onToggleCommits(wantEarlierCommits) {
         this.props.onToggleCommits(wantEarlierCommits);
+    },
+
+    onDoneToggle: function onDoneToggle(ev) {
+        if (!this.props.onMarkDone || !ev.target.checked) {
+            return;
+        }
+        this.props.onMarkDone();
     },
 
     render: function render() {
@@ -348,6 +357,16 @@ module.exports = React.createClass({ displayName: 'CommentView',
             // TODO ends in a block quote, hide it behind a toggle button.
         }
 
+        var doneArea;
+        if (this.props.onMarkDone) {
+            doneArea = React.createElement(
+                "label",
+                null,
+                React.createElement("input", { type: "checkbox", onChange: this.onDoneToggle }),
+                "Done?"
+            );
+        }
+
         return React.createElement(
             "div",
             { className: "CommentView" },
@@ -364,7 +383,8 @@ module.exports = React.createClass({ displayName: 'CommentView',
                     { href: comment.getLink(), target: "_blank" },
                     "(Source)"
                 ),
-                lineCommentHeader
+                lineCommentHeader,
+                doneArea
             ),
             React.createElement("div", { className: "CommentView_body",
                 dangerouslySetInnerHTML: { __html: htmlBody } })
@@ -922,6 +942,8 @@ module.exports = React.createClass({ displayName: 'InfoGetter',
         switch (event.target.id) {
             case KEY_TOKEN:
                 this.props.onUpdateToken(newVal);
+                break;
+            default:
                 break;
         }
     },
@@ -2039,12 +2061,12 @@ ListController.prototype._loadAssignedPulls = function (prs) {
     for (var i = 0; i < prs.length; ++i) {
         var pr = prs[i];
         var me = pr.getAssignee();
-        if (pr.getOwner() === me) {
+        if (pr.getOwner().equals(me)) {
             // PR will appear in my pulls, don't duplicate it in assigned pulls
             continue;
-        } else if (pr.getLastCommenter() === pr.getOwner()) {
+        } else if (pr.getOwner().equals(pr.getLastCommenter())) {
             assignedPulls.assignedNeedsAction.push(pr);
-        } else if (pr.getLastCommenter() !== me) {
+        } else if (!me.equals(pr.getLastCommenter())) {
             assignedPulls.assignedOthersInvolved.push(pr);
         } else {
             assignedPulls.assignedNoAction.push(pr);
@@ -3054,6 +3076,13 @@ User.prototype.getUserLinkJsx = function (key) {
     );
 };
 
+User.prototype.equals = function (other) {
+    if (!other) {
+        return false;
+    }
+    return this.name === other.name;
+};
+
 module.exports = User;
 },{"react":582}],29:[function(require,module,exports){
 "use strict";
@@ -3095,13 +3124,19 @@ module.exports = SessionStore;
 "use strict";
 
 var React = require("react");
+var CommentBox = require("../components/comment-box");
 var CommentView = require("../components/comment-view");
 var CommentDiffListView = require("../components/comment-diff-list-view");
 var Actions = require("../logic/models/action");
 var ActionMixin = require("../logic/actions").ActionMixin(["pr_info", "file_diffs", "line_comments"]);
+var dispatcher = require("../logic/dispatcher");
 
 module.exports = React.createClass({ displayName: 'ActionsPage',
     mixins: [ActionMixin],
+
+    propTypes: {
+        controller: React.PropTypes.any.isRequired
+    },
 
     getInitialState: function getInitialState() {
         return {
@@ -3113,6 +3148,25 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
     // navigating first mount
     componentDidMount: function componentDidMount() {
         this._loadDiffs(this.props);
+        this._disRef = dispatcher.register(this.onReceiveAction);
+    },
+
+    onReceiveAction: function onReceiveAction(payload) {
+        if (payload.action === "line_comments" && this.state.actions) {
+            // force refresh the actions to show the new comment. This
+            // is done horribly currently by ticking to make sure the ActionMixin
+            // has set the new state, which we then refresh from.
+            var self = this;
+            setTimeout(function () {
+                self.setState({
+                    actions: Actions.fromLineComments(self.state.line_comments.comments)
+                });
+            }, 5);
+        }
+    },
+
+    componentWillUnmount: function componentWillUnmount() {
+        dispatcher.unregister(this._disRef);
     },
 
     // navigating once mounted
@@ -3177,13 +3231,26 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
         );
     },
 
+    onSubmitLineReply: function onSubmitLineReply(action, text) {
+        return this.props.controller.postReplyLineComment(this.state.pr_info.pr, text, action.getHeadComment());
+    },
+
     getActionJsx: function getActionJsx(action, index, isDone) {
         var id = isDone ? "d" + index : "n" + index;
         var body;
         if (this.state.expanded[id]) {
-            body = React.createElement(CommentDiffListView, {
-                patch: action.getHeadComment().getPatch(),
-                comments: action.getComments() });
+            var cmtBox;
+            if (!isDone) {
+                cmtBox = React.createElement(CommentBox, { onSubmit: this.onSubmitLineReply.bind(this, action) });
+            }
+            body = React.createElement(
+                "div",
+                null,
+                React.createElement(CommentDiffListView, {
+                    patch: action.getHeadComment().getPatch(),
+                    comments: action.getComments() }),
+                cmtBox
+            );
         } else {
             body = React.createElement(CommentView, { key: index, comment: action.getHeadComment() });
         }
@@ -3236,7 +3303,7 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
         );
     }
 });
-},{"../components/comment-diff-list-view":3,"../components/comment-view":5,"../logic/actions":13,"../logic/models/action":20,"react":582}],31:[function(require,module,exports){
+},{"../components/comment-box":2,"../components/comment-diff-list-view":3,"../components/comment-view":5,"../logic/actions":13,"../logic/dispatcher":17,"../logic/models/action":20,"react":582}],31:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
