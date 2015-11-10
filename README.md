@@ -21,9 +21,9 @@ Currently, GPR does the following over and above Github's UI:
  - Provides buttons along with each line comment to see "this file *when* this comment was made" and "this file *after* this comment was made"
  - Show line comments that were made on this file several commits ago (Github doesn't show these at all, GPR gates them behind "Show all comments")
  - Show/Hide per-file
+ - Merge by squashing commits
  
 Github Pull Review doesn't currently do the following things Github's UI does:
- - Merge/Close button
  - Provide syntax highlighting on code
  - Provide an "Activity stream" of comments and commits chronologically.
 
