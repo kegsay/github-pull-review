@@ -23,14 +23,15 @@
   "devDependencies": {
     "eslint": "^1.5.1",
     "eslint-plugin-react": "^3.4.2",
-    "flow": "^0.2.3",
+    "flow-bin": "^0.18.1",
     "parallelshell": "^2.0.0",
     "watchify": "^3.4.0"
   },
   "scripts": {
     "build": "babel --presets es2015,react lib/ --out-dir gen/ && browserify -e gen/app.js -o build/bundle.js && shjs build.js",
-    "test": "npm run build && npm run lint",
+    "test": "npm run typecheck && npm run build && npm run lint",
     "lint": "eslint lib",
+    "typecheck": "flow check lib/",
     "watch": "parallelshell \"babel --presets es2015,react --watch lib/ --out-dir gen/\" \"watchify -e gen/app.js -o build/bundle.js\""
   },
   "repository": {
