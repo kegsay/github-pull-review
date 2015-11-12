@@ -1,0 +1,357 @@
+[
+  {
+    "sha": "88dea51ec2d94a94e6523b997a5a92823caeb480",
+    "commit": {
+      "author": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T19:24:08Z"
+      },
+      "committer": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T19:24:08Z"
+      },
+      "message": "Remove some 'return if COND' cases in tests/",
+      "tree": {
+        "sha": "713e72c02fe3f258ab446da1faf929a26e02a812",
+        "url": "https://api.github.com/repos/matrix-org/sytest/git/trees/713e72c02fe3f258ab446da1faf929a26e02a812"
+      },
+      "url": "https://api.github.com/repos/matrix-org/sytest/git/commits/88dea51ec2d94a94e6523b997a5a92823caeb480",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/sytest/commits/88dea51ec2d94a94e6523b997a5a92823caeb480",
+    "html_url": "https://github.com/matrix-org/sytest/commit/88dea51ec2d94a94e6523b997a5a92823caeb480",
+    "comments_url": "https://api.github.com/repos/matrix-org/sytest/commits/88dea51ec2d94a94e6523b997a5a92823caeb480/comments",
+    "author": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "c50f395f26ffbb2aaf8eb560d6466b59206943c2",
+        "url": "https://api.github.com/repos/matrix-org/sytest/commits/c50f395f26ffbb2aaf8eb560d6466b59206943c2",
+        "html_url": "https://github.com/matrix-org/sytest/commit/c50f395f26ffbb2aaf8eb560d6466b59206943c2"
+      }
+    ]
+  },
+  {
+    "sha": "438d7c42332c2aec8a7a2c0a545cf6a2131635ca",
+    "commit": {
+      "author": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T19:34:25Z"
+      },
+      "committer": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T19:34:30Z"
+      },
+      "message": "Replace occurances of 'return VAL unless COND' with 'COND or return VAL'",
+      "tree": {
+        "sha": "6d356a873e708254cd11ccbcc38d2df319083f1f",
+        "url": "https://api.github.com/repos/matrix-org/sytest/git/trees/6d356a873e708254cd11ccbcc38d2df319083f1f"
+      },
+      "url": "https://api.github.com/repos/matrix-org/sytest/git/commits/438d7c42332c2aec8a7a2c0a545cf6a2131635ca",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/sytest/commits/438d7c42332c2aec8a7a2c0a545cf6a2131635ca",
+    "html_url": "https://github.com/matrix-org/sytest/commit/438d7c42332c2aec8a7a2c0a545cf6a2131635ca",
+    "comments_url": "https://api.github.com/repos/matrix-org/sytest/commits/438d7c42332c2aec8a7a2c0a545cf6a2131635ca/comments",
+    "author": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "88dea51ec2d94a94e6523b997a5a92823caeb480",
+        "url": "https://api.github.com/repos/matrix-org/sytest/commits/88dea51ec2d94a94e6523b997a5a92823caeb480",
+        "html_url": "https://github.com/matrix-org/sytest/commit/88dea51ec2d94a94e6523b997a5a92823caeb480"
+      }
+    ]
+  },
+  {
+    "sha": "4fc29174d258bcf515666b201a887f81eeb5036c",
+    "commit": {
+      "author": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T19:59:28Z"
+      },
+      "committer": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T19:59:28Z"
+      },
+      "message": "Replace occurances of 'return unless COND' with 'COND or return'",
+      "tree": {
+        "sha": "758acccd387246fb552030f5c34d83e9e59445d5",
+        "url": "https://api.github.com/repos/matrix-org/sytest/git/trees/758acccd387246fb552030f5c34d83e9e59445d5"
+      },
+      "url": "https://api.github.com/repos/matrix-org/sytest/git/commits/4fc29174d258bcf515666b201a887f81eeb5036c",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/sytest/commits/4fc29174d258bcf515666b201a887f81eeb5036c",
+    "html_url": "https://github.com/matrix-org/sytest/commit/4fc29174d258bcf515666b201a887f81eeb5036c",
+    "comments_url": "https://api.github.com/repos/matrix-org/sytest/commits/4fc29174d258bcf515666b201a887f81eeb5036c/comments",
+    "author": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "438d7c42332c2aec8a7a2c0a545cf6a2131635ca",
+        "url": "https://api.github.com/repos/matrix-org/sytest/commits/438d7c42332c2aec8a7a2c0a545cf6a2131635ca",
+        "html_url": "https://github.com/matrix-org/sytest/commit/438d7c42332c2aec8a7a2c0a545cf6a2131635ca"
+      }
+    ]
+  },
+  {
+    "sha": "8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2",
+    "commit": {
+      "author": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T20:32:56Z"
+      },
+      "committer": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-10T20:32:56Z"
+      },
+      "message": "Replace occurances of 'die ... if COND' with 'COND and die ...'",
+      "tree": {
+        "sha": "f7755f13c4809c8be0d7442814981ca68310a709",
+        "url": "https://api.github.com/repos/matrix-org/sytest/git/trees/f7755f13c4809c8be0d7442814981ca68310a709"
+      },
+      "url": "https://api.github.com/repos/matrix-org/sytest/git/commits/8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/sytest/commits/8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2",
+    "html_url": "https://github.com/matrix-org/sytest/commit/8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2",
+    "comments_url": "https://api.github.com/repos/matrix-org/sytest/commits/8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2/comments",
+    "author": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "4fc29174d258bcf515666b201a887f81eeb5036c",
+        "url": "https://api.github.com/repos/matrix-org/sytest/commits/4fc29174d258bcf515666b201a887f81eeb5036c",
+        "html_url": "https://github.com/matrix-org/sytest/commit/4fc29174d258bcf515666b201a887f81eeb5036c"
+      }
+    ]
+  },
+  {
+    "sha": "df3c76bcccc8cc5e632f9127a52e6977a7847248",
+    "commit": {
+      "author": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-11T16:16:56Z"
+      },
+      "committer": {
+        "name": "Paul \"LeoNerd\" Evans",
+        "email": "leonerd@leonerd.org.uk",
+        "date": "2015-11-11T16:16:56Z"
+      },
+      "message": "Merge branch 'develop' into paul/remove-return-if",
+      "tree": {
+        "sha": "8cd5c750f5e535742e98a19a7ef4f6d993e941ab",
+        "url": "https://api.github.com/repos/matrix-org/sytest/git/trees/8cd5c750f5e535742e98a19a7ef4f6d993e941ab"
+      },
+      "url": "https://api.github.com/repos/matrix-org/sytest/git/commits/df3c76bcccc8cc5e632f9127a52e6977a7847248",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/sytest/commits/df3c76bcccc8cc5e632f9127a52e6977a7847248",
+    "html_url": "https://github.com/matrix-org/sytest/commit/df3c76bcccc8cc5e632f9127a52e6977a7847248",
+    "comments_url": "https://api.github.com/repos/matrix-org/sytest/commits/df3c76bcccc8cc5e632f9127a52e6977a7847248/comments",
+    "author": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2",
+        "url": "https://api.github.com/repos/matrix-org/sytest/commits/8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2",
+        "html_url": "https://github.com/matrix-org/sytest/commit/8ae73f74b59ff8bd3abaf88da1dbdef8fc792ee2"
+      },
+      {
+        "sha": "0aaa8bc41e09e6ed88f368cb7b790807f17267c9",
+        "url": "https://api.github.com/repos/matrix-org/sytest/commits/0aaa8bc41e09e6ed88f368cb7b790807f17267c9",
+        "html_url": "https://github.com/matrix-org/sytest/commit/0aaa8bc41e09e6ed88f368cb7b790807f17267c9"
+      }
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "c2450b771a67592fd757938cb409d63e12c0678a",
+    "filename": "synapse/api/constants.py",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/api/constants.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/api/constants.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/api/constants.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -68,6 +68,7 @@ class EventTypes(object):\n     RoomHistoryVisibility = \"m.room.history_visibility\"\n     CanonicalAlias = \"m.room.canonical_alias\"\n     RoomAvatar = \"m.room.avatar\"\n+    GuestAccess = \"m.room.guest_access\"\n \n     # These are used for validation\n     Message = \"m.room.message\""
+  },
+  {
+    "sha": "f4ade1f5942668229ae85a0fb7b53728b974cff4",
+    "filename": "synapse/handlers/_base.py",
+    "status": "modified",
+    "additions": 57,
+    "deletions": 0,
+    "changes": 57,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/_base.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/_base.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/handlers/_base.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -175,6 +175,8 @@ def handle_new_client_event(self, event, context, extra_destinations=[],\n         if not suppress_auth:\n             self.auth.check(event, auth_events=context.current_state)\n \n+        yield self.maybe_kick_guest_users(event, context.current_state.values())\n+\n         if event.type == EventTypes.CanonicalAlias:\n             # Check the alias is acually valid (at this time at least)\n             room_alias_str = event.content.get(\"alias\", None)\n@@ -282,3 +284,58 @@ def log_failure(f):\n         federation_handler.handle_new_event(\n             event, destinations=destinations,\n         )\n+\n+    @defer.inlineCallbacks\n+    def maybe_kick_guest_users(self, event, current_state):\n+        # Technically this function invalidates current_state by changing it.\n+        # Hopefully this isn't that important to the caller.\n+        if event.type == EventTypes.GuestAccess:\n+            guest_access = event.content.get(\"guest_access\", \"forbidden\")\n+            if guest_access != \"can_join\":\n+                yield self.kick_guest_users(current_state)\n+\n+    @defer.inlineCallbacks\n+    def kick_guest_users(self, current_state):\n+        for member_event in current_state:\n+            try:\n+                if member_event.type != EventTypes.Member:\n+                    continue\n+\n+                if not self.hs.is_mine(UserID.from_string(member_event.state_key)):\n+                    continue\n+\n+                if member_event.content[\"membership\"] not in {\n+                    Membership.JOIN,\n+                    Membership.INVITE\n+                }:\n+                    continue\n+\n+                if (\n+                    \"kind\" not in member_event.content\n+                    or member_event.content[\"kind\"] != \"guest\"\n+                ):\n+                    continue\n+\n+                # We make the user choose to leave, rather than have the\n+                # event-sender kick them. This is partially because we don't\n+                # need to worry about power levels, and partially because guest\n+                # users are a concept which doesn't hugely work over federation,\n+                # and having homeservers have their own users leave keeps more\n+                # of that decision-making and control local to the guest-having\n+                # homeserver.\n+                message_handler = self.hs.get_handlers().message_handler\n+                yield message_handler.create_and_send_event(\n+                    {\n+                        \"type\": EventTypes.Member,\n+                        \"state_key\": member_event.state_key,\n+                        \"content\": {\n+                            \"membership\": Membership.LEAVE,\n+                            \"kind\": \"guest\"\n+                        },\n+                        \"room_id\": member_event.room_id,\n+                        \"sender\": member_event.state_key\n+                    },\n+                    ratelimit=False,\n+                )\n+            except Exception as e:\n+                logger.warn(\"Error kicking guest user: %s\" % (e,))"
+  },
+  {
+    "sha": "d1589334a5f8b4643a725628fa446e23794d4e96",
+    "filename": "synapse/handlers/federation.py",
+    "status": "modified",
+    "additions": 5,
+    "deletions": 5,
+    "changes": 10,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/federation.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/federation.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/handlers/federation.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -1097,8 +1097,6 @@ def _handle_new_event(self, origin, event, state=None, backfilled=False,\n         context = yield self._prep_event(\n             origin, event,\n             state=state,\n-            backfilled=backfilled,\n-            current_state=current_state,\n             auth_events=auth_events,\n         )\n \n@@ -1121,7 +1119,6 @@ def _handle_new_events(self, origin, event_infos, backfilled=False,\n                     origin,\n                     ev_info[\"event\"],\n                     state=ev_info.get(\"state\"),\n-                    backfilled=backfilled,\n                     auth_events=ev_info.get(\"auth_events\"),\n                 )\n                 for ev_info in event_infos\n@@ -1208,8 +1205,7 @@ def _persist_auth_tree(self, auth_events, state, event):\n         defer.returnValue((event_stream_id, max_stream_id))\n \n     @defer.inlineCallbacks\n-    def _prep_event(self, origin, event, state=None, backfilled=False,\n-                    current_state=None, auth_events=None):\n+    def _prep_event(self, origin, event, state=None, auth_events=None):\n         outlier = event.internal_metadata.is_outlier()\n \n         context = yield self.state_handler.compute_event_context(\n@@ -1242,6 +1238,10 @@ def _prep_event(self, origin, event, state=None, backfilled=False,\n \n             context.rejected = RejectedReason.AUTH_ERROR\n \n+        if event.type == EventTypes.GuestAccess:\n+            full_context = yield self.store.get_current_state(room_id=event.room_id)\n+            yield self.maybe_kick_guest_users(event, full_context)\n+\n         defer.returnValue(context)\n \n     @defer.inlineCallbacks"
+  },
+  {
+    "sha": "7d31ff8d46099ebb56a837769179800fae0ebbce",
+    "filename": "synapse/handlers/message.py",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/message.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/message.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/handlers/message.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -167,7 +167,7 @@ def get_messages(self, user_id=None, room_id=None, pagin_config=None,\n \n     @defer.inlineCallbacks\n     def create_and_send_event(self, event_dict, ratelimit=True,\n-                              token_id=None, txn_id=None):\n+                              token_id=None, txn_id=None, is_guest=False):\n         \"\"\" Given a dict from a client, create and handle a new event.\n \n         Creates an FrozenEvent object, filling out auth_events, prev_events,\n@@ -213,7 +213,7 @@ def create_and_send_event(self, event_dict, ratelimit=True,\n \n         if event.type == EventTypes.Member:\n             member_handler = self.hs.get_handlers().room_member_handler\n-            yield member_handler.change_membership(event, context)\n+            yield member_handler.change_membership(event, context, is_guest=is_guest)\n         else:\n             yield self.handle_new_client_event(\n                 event=event,"
+  },
+  {
+    "sha": "aca65096fccf3a771b194c7788e1471f39fb4b11",
+    "filename": "synapse/handlers/presence.py",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 1,
+    "changes": 3,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/presence.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/presence.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/handlers/presence.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -950,7 +950,8 @@ def incoming_presence(self, origin, content):\n                 )\n                 while len(self._remote_offline_serials) > MAX_OFFLINE_SERIALS:\n                     self._remote_offline_serials.pop()  # remove the oldest\n-                del self._user_cachemap[user]\n+                if user in self._user_cachemap:\n+                    del self._user_cachemap[user]\n             else:\n                 # Remove the user from remote_offline_serials now that they're\n                 # no longer offline"
+  },
+  {
+    "sha": "7d18218cd9cb919faed5dfd388c2c5127c5cc3a8",
+    "filename": "synapse/handlers/room.py",
+    "status": "modified",
+    "additions": 15,
+    "deletions": 1,
+    "changes": 16,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/room.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/handlers/room.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/handlers/room.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -369,7 +369,7 @@ def fetch_room_distributions_into(self, room_id, localusers=None,\n                     remotedomains.add(member.domain)\n \n     @defer.inlineCallbacks\n-    def change_membership(self, event, context, do_auth=True):\n+    def change_membership(self, event, context, do_auth=True, is_guest=False):\n         \"\"\" Change the membership status of a user in a room.\n \n         Args:\n@@ -390,6 +390,20 @@ def change_membership(self, event, context, do_auth=True):\n         # if this HS is not currently in the room, i.e. we have to do the\n         # invite/join dance.\n         if event.membership == Membership.JOIN:\n+            if is_guest:\n+                guest_access = context.current_state.get(\n+                    (EventTypes.GuestAccess, \"\"),\n+                    None\n+                )\n+                is_guest_access_allowed = (\n+                    guest_access\n+                    and guest_access.content\n+                    and \"guest_access\" in guest_access.content\n+                    and guest_access.content[\"guest_access\"] == \"can_join\"\n+                )\n+                if not is_guest_access_allowed:\n+                    raise AuthError(403, \"Guest access not allowed\")\n+\n             yield self._do_join(event, context, do_auth=do_auth)\n         else:\n             if event.membership == Membership.LEAVE:"
+  },
+  {
+    "sha": "03ac073926600d95e788e1cfbc913cc005862eda",
+    "filename": "synapse/rest/client/v1/room.py",
+    "status": "modified",
+    "additions": 10,
+    "deletions": 3,
+    "changes": 13,
+    "blob_url": "https://github.com/matrix-org/synapse/blob/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/rest/client/v1/room.py",
+    "raw_url": "https://github.com/matrix-org/synapse/raw/38d82edf0e463e1e6eb6859330f2517cc7ae3e41/synapse/rest/client/v1/room.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/synapse/contents/synapse/rest/client/v1/room.py?ref=38d82edf0e463e1e6eb6859330f2517cc7ae3e41",
+    "patch": "@@ -175,7 +175,7 @@ def register(self, http_server):\n \n     @defer.inlineCallbacks\n     def on_POST(self, request, room_id, event_type, txn_id=None):\n-        user, token_id, _ = yield self.auth.get_user_by_req(request)\n+        user, token_id, _ = yield self.auth.get_user_by_req(request, allow_guest=True)\n         content = _parse_json(request)\n \n         msg_handler = self.handlers.message_handler\n@@ -220,7 +220,10 @@ def register(self, http_server):\n \n     @defer.inlineCallbacks\n     def on_POST(self, request, room_identifier, txn_id=None):\n-        user, token_id, _ = yield self.auth.get_user_by_req(request)\n+        user, token_id, is_guest = yield self.auth.get_user_by_req(\n+            request,\n+            allow_guest=True\n+        )\n \n         # the identifier could be a room alias or a room id. Try one then the\n         # other if it fails to parse, without swallowing other valid\n@@ -242,16 +245,20 @@ def on_POST(self, request, room_identifier, txn_id=None):\n             defer.returnValue((200, ret_dict))\n         else:  # room id\n             msg_handler = self.handlers.message_handler\n+            content = {\"membership\": Membership.JOIN}\n+            if is_guest:\n+                content[\"kind\"] = \"guest\"\n             yield msg_handler.create_and_send_event(\n                 {\n                     \"type\": EventTypes.Member,\n-                    \"content\": {\"membership\": Membership.JOIN},\n+                    \"content\": content,\n                     \"room_id\": identifier.to_string(),\n                     \"sender\": user.to_string(),\n                     \"state_key\": user.to_string(),\n                 },\n                 token_id=token_id,\n                 txn_id=txn_id,\n+                is_guest=is_guest,\n             )\n \n             defer.returnValue((200, {\"room_id\": identifier.to_string()}))"
+  }
+]
