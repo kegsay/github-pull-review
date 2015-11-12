@@ -1,0 +1,26 @@
+[
+  {
+    "sha": "90b51290ab6d9c629ac4ceb3632d0985db2209b0",
+    "filename": "api/client-server/v1/rooms.yaml",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/061105c9dc25d52a01ba260afc9c90bd0158931b/api/client-server/v1/rooms.yaml",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/061105c9dc25d52a01ba260afc9c90bd0158931b/api/client-server/v1/rooms.yaml",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/api/client-server/v1/rooms.yaml?ref=061105c9dc25d52a01ba260afc9c90bd0158931b",
+    "patch": "@@ -371,7 +371,7 @@ paths:\n                 description: |-\n                   Whether this room is visible to the ``/publicRooms`` API\n                   or not.\"\n-            required: [\"room_id\", \"membership\"]\n+            required: [\"room_id\"]\n         403:\n           description: >\n             You aren't a member of the room and weren't previously a"
+  },
+  {
+    "sha": "ae8d156e875c5b5e1bc6f99221d424515b3ef2ae",
+    "filename": "specification/modules/guest_access.rst",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/061105c9dc25d52a01ba260afc9c90bd0158931b/specification/modules/guest_access.rst",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/061105c9dc25d52a01ba260afc9c90bd0158931b/specification/modules/guest_access.rst",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/specification/modules/guest_access.rst?ref=061105c9dc25d52a01ba260afc9c90bd0158931b",
+    "patch": "@@ -32,6 +32,7 @@ retrieving events:\n * `GET /rooms/:room_id/state <#get-matrix-client-api-v1-rooms-roomid-state>`_\n * `GET /rooms/:room_id/state/:event_type/:state_key <#get-matrix-client-api-v1-rooms-roomid-state-eventtype-statekey>`_\n * `GET /rooms/:room_id/messages <#get-matrix-client-api-v1-rooms-roomid-messages>`_\n+* `GET /rooms/:room_id/initialSync <#get-matrix-client-api-v1-rooms-roomid-initialsync>`_\n \n There is also a special version of the\n `GET /events <#get-matrix-client-api-v1-events>`_ endpoint:"
+  }
+]

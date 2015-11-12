@@ -1,0 +1,792 @@
+[
+  {
+    "sha": "81a60a25ccd78b413d5fc0a25e6267dcf05db23d",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T14:46:10Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T14:46:10Z"
+      },
+      "message": "Update 3pid spec based on new implementation",
+      "tree": {
+        "sha": "37ae13ad1d0d088f068cada6bb47c77b495850f7",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/37ae13ad1d0d088f068cada6bb47c77b495850f7"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/81a60a25ccd78b413d5fc0a25e6267dcf05db23d",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/81a60a25ccd78b413d5fc0a25e6267dcf05db23d",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/81a60a25ccd78b413d5fc0a25e6267dcf05db23d",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/81a60a25ccd78b413d5fc0a25e6267dcf05db23d/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "3dd212e53bcd00aac8acba45bc330a5bbc8b7a74",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/3dd212e53bcd00aac8acba45bc330a5bbc8b7a74",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/3dd212e53bcd00aac8acba45bc330a5bbc8b7a74"
+      }
+    ]
+  },
+  {
+    "sha": "b92a0f2b4de47093b229e9f0521aec2bb008435c",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T14:49:22Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T14:49:41Z"
+      },
+      "message": "Remove extra trailing comma",
+      "tree": {
+        "sha": "30588e8f941ca1455354b3b5c6fef214b875e827",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/30588e8f941ca1455354b3b5c6fef214b875e827"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/b92a0f2b4de47093b229e9f0521aec2bb008435c",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b92a0f2b4de47093b229e9f0521aec2bb008435c",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/b92a0f2b4de47093b229e9f0521aec2bb008435c",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b92a0f2b4de47093b229e9f0521aec2bb008435c/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "81a60a25ccd78b413d5fc0a25e6267dcf05db23d",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/81a60a25ccd78b413d5fc0a25e6267dcf05db23d",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/81a60a25ccd78b413d5fc0a25e6267dcf05db23d"
+      }
+    ]
+  },
+  {
+    "sha": "176f919fc89f5d01669aea17003aef8da903ce4e",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T15:00:53Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T15:00:53Z"
+      },
+      "message": "Show multiple examples where present",
+      "tree": {
+        "sha": "fe0f29d3454e53f072ef1689d5426225f9231a78",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/fe0f29d3454e53f072ef1689d5426225f9231a78"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/176f919fc89f5d01669aea17003aef8da903ce4e",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/176f919fc89f5d01669aea17003aef8da903ce4e",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/176f919fc89f5d01669aea17003aef8da903ce4e",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/176f919fc89f5d01669aea17003aef8da903ce4e/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "b92a0f2b4de47093b229e9f0521aec2bb008435c",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b92a0f2b4de47093b229e9f0521aec2bb008435c",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/b92a0f2b4de47093b229e9f0521aec2bb008435c"
+      }
+    ]
+  },
+  {
+    "sha": "810922bb381a0f7162941605ec631f00927071ef",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T15:06:44Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-28T15:06:44Z"
+      },
+      "message": "Fix schema validator for multiple examples",
+      "tree": {
+        "sha": "61dbb4b25d1da22255bca1dfd8df8e3f99cd9322",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/61dbb4b25d1da22255bca1dfd8df8e3f99cd9322"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/810922bb381a0f7162941605ec631f00927071ef",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/810922bb381a0f7162941605ec631f00927071ef",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/810922bb381a0f7162941605ec631f00927071ef",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/810922bb381a0f7162941605ec631f00927071ef/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "176f919fc89f5d01669aea17003aef8da903ce4e",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/176f919fc89f5d01669aea17003aef8da903ce4e",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/176f919fc89f5d01669aea17003aef8da903ce4e"
+      }
+    ]
+  },
+  {
+    "sha": "cddfc110edc9018e44ce1a3690f3f6431a0ea9b7",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-29T12:48:04Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-29T12:48:04Z"
+      },
+      "message": "Review comments",
+      "tree": {
+        "sha": "13142482cd66e37e285de98e968976584ba20c31",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/13142482cd66e37e285de98e968976584ba20c31"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/cddfc110edc9018e44ce1a3690f3f6431a0ea9b7",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/cddfc110edc9018e44ce1a3690f3f6431a0ea9b7",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/cddfc110edc9018e44ce1a3690f3f6431a0ea9b7",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/cddfc110edc9018e44ce1a3690f3f6431a0ea9b7/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "b92a0f2b4de47093b229e9f0521aec2bb008435c",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b92a0f2b4de47093b229e9f0521aec2bb008435c",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/b92a0f2b4de47093b229e9f0521aec2bb008435c"
+      }
+    ]
+  },
+  {
+    "sha": "b8d412356e64ec900c091dd721ec70293bdd3828",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-30T16:20:46Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-30T16:20:46Z"
+      },
+      "message": "Merge branch 'daniel/3pidinvites' into daniel/multipleexamples",
+      "tree": {
+        "sha": "43679d91c05d0a1865a04e4aad90ff882ae321ed",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/43679d91c05d0a1865a04e4aad90ff882ae321ed"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/b8d412356e64ec900c091dd721ec70293bdd3828",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b8d412356e64ec900c091dd721ec70293bdd3828",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/b8d412356e64ec900c091dd721ec70293bdd3828",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b8d412356e64ec900c091dd721ec70293bdd3828/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "810922bb381a0f7162941605ec631f00927071ef",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/810922bb381a0f7162941605ec631f00927071ef",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/810922bb381a0f7162941605ec631f00927071ef"
+      },
+      {
+        "sha": "cddfc110edc9018e44ce1a3690f3f6431a0ea9b7",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/cddfc110edc9018e44ce1a3690f3f6431a0ea9b7",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/cddfc110edc9018e44ce1a3690f3f6431a0ea9b7"
+      }
+    ]
+  },
+  {
+    "sha": "9f4d81308d3eca3870f54c196335d2bb5176bd44",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-30T16:21:50Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-10-30T16:21:50Z"
+      },
+      "message": "Pull out separate invite_room_state example",
+      "tree": {
+        "sha": "ac035daa7ab9953056675d25ad801dbe7c69c977",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/ac035daa7ab9953056675d25ad801dbe7c69c977"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/9f4d81308d3eca3870f54c196335d2bb5176bd44",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/9f4d81308d3eca3870f54c196335d2bb5176bd44",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/9f4d81308d3eca3870f54c196335d2bb5176bd44",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/9f4d81308d3eca3870f54c196335d2bb5176bd44/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "b8d412356e64ec900c091dd721ec70293bdd3828",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/b8d412356e64ec900c091dd721ec70293bdd3828",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/b8d412356e64ec900c091dd721ec70293bdd3828"
+      }
+    ]
+  },
+  {
+    "sha": "2734f9f9f2bf0240c225f5132761db3d481631ee",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-05T18:33:31Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-05T18:33:31Z"
+      },
+      "message": "Merge branch 'master' into daniel/multipleexamples\n\nConflicts:\n\tspecification/modules/third_party_invites.rst",
+      "tree": {
+        "sha": "b0fc471d2cdc19131400644b1c447025b57f6f87",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/b0fc471d2cdc19131400644b1c447025b57f6f87"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/2734f9f9f2bf0240c225f5132761db3d481631ee",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/2734f9f9f2bf0240c225f5132761db3d481631ee",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/2734f9f9f2bf0240c225f5132761db3d481631ee",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/2734f9f9f2bf0240c225f5132761db3d481631ee/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "9f4d81308d3eca3870f54c196335d2bb5176bd44",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/9f4d81308d3eca3870f54c196335d2bb5176bd44",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/9f4d81308d3eca3870f54c196335d2bb5176bd44"
+      },
+      {
+        "sha": "161441fa3ae83db985c51c9f1c8a4cb96494bd45",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/161441fa3ae83db985c51c9f1c8a4cb96494bd45",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/161441fa3ae83db985c51c9f1c8a4cb96494bd45"
+      }
+    ]
+  },
+  {
+    "sha": "d5f96af1f1f466c900a1456b5c72ded1ca01c4ab",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-06T14:21:28Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-06T14:21:28Z"
+      },
+      "message": "Merge branch 'master' into daniel/multipleexamples",
+      "tree": {
+        "sha": "9d829aa40c759e864a3fa7849c9660e1e87f2794",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/9d829aa40c759e864a3fa7849c9660e1e87f2794"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/d5f96af1f1f466c900a1456b5c72ded1ca01c4ab",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/d5f96af1f1f466c900a1456b5c72ded1ca01c4ab",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/d5f96af1f1f466c900a1456b5c72ded1ca01c4ab",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/d5f96af1f1f466c900a1456b5c72ded1ca01c4ab/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "2734f9f9f2bf0240c225f5132761db3d481631ee",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/2734f9f9f2bf0240c225f5132761db3d481631ee",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/2734f9f9f2bf0240c225f5132761db3d481631ee"
+      },
+      {
+        "sha": "cfdcf9e5a3624c8efe2bcdd861f84d48d122c284",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/cfdcf9e5a3624c8efe2bcdd861f84d48d122c284",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/cfdcf9e5a3624c8efe2bcdd861f84d48d122c284"
+      }
+    ]
+  },
+  {
+    "sha": "071edcd86e4785830d3f8156fbf0acea3a9a9209",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-10T13:22:35Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-10T13:22:35Z"
+      },
+      "message": "Merge branch 'master' into daniel/multipleexamples",
+      "tree": {
+        "sha": "2439d85b6cae037e5be41150c6ac0f973cc3c6c3",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/2439d85b6cae037e5be41150c6ac0f973cc3c6c3"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/071edcd86e4785830d3f8156fbf0acea3a9a9209",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/071edcd86e4785830d3f8156fbf0acea3a9a9209",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/071edcd86e4785830d3f8156fbf0acea3a9a9209",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/071edcd86e4785830d3f8156fbf0acea3a9a9209/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "d5f96af1f1f466c900a1456b5c72ded1ca01c4ab",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/d5f96af1f1f466c900a1456b5c72ded1ca01c4ab",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/d5f96af1f1f466c900a1456b5c72ded1ca01c4ab"
+      },
+      {
+        "sha": "68bec3a61a0f3a2b41d2dd2986eeb29af669e5fa",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/68bec3a61a0f3a2b41d2dd2986eeb29af669e5fa",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/68bec3a61a0f3a2b41d2dd2986eeb29af669e5fa"
+      }
+    ]
+  },
+  {
+    "sha": "c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "commit": {
+      "author": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-10T15:26:51Z"
+      },
+      "committer": {
+        "name": "Daniel Wagner-Hall",
+        "email": "daniel@matrix.org",
+        "date": "2015-11-10T15:26:51Z"
+      },
+      "message": "Fix msgtype display",
+      "tree": {
+        "sha": "179ffbb5612cc464275b79418003eca5b0d04e41",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/trees/179ffbb5612cc464275b79418003eca5b0d04e41"
+      },
+      "url": "https://api.github.com/repos/matrix-org/matrix-doc/git/commits/c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+      "comment_count": 0
+    },
+    "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "html_url": "https://github.com/matrix-org/matrix-doc/commit/c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "comments_url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/c00abe9f2faa80f6cfcf7fba028de870eca676ac/comments",
+    "author": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "illicitonion",
+      "id": 1131704,
+      "avatar_url": "https://avatars.githubusercontent.com/u/1131704?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/illicitonion",
+      "html_url": "https://github.com/illicitonion",
+      "followers_url": "https://api.github.com/users/illicitonion/followers",
+      "following_url": "https://api.github.com/users/illicitonion/following{/other_user}",
+      "gists_url": "https://api.github.com/users/illicitonion/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/illicitonion/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/illicitonion/subscriptions",
+      "organizations_url": "https://api.github.com/users/illicitonion/orgs",
+      "repos_url": "https://api.github.com/users/illicitonion/repos",
+      "events_url": "https://api.github.com/users/illicitonion/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/illicitonion/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "071edcd86e4785830d3f8156fbf0acea3a9a9209",
+        "url": "https://api.github.com/repos/matrix-org/matrix-doc/commits/071edcd86e4785830d3f8156fbf0acea3a9a9209",
+        "html_url": "https://github.com/matrix-org/matrix-doc/commit/071edcd86e4785830d3f8156fbf0acea3a9a9209"
+      }
+    ]
+  }
+]

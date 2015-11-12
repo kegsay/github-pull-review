@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://api.github.com/repos/matrix-org/synapse/pulls/comments/44304591",
+    "id": 44304591,
+    "diff_hunk": "@@ -282,3 +284,41 @@ def log_failure(f):\n         federation_handler.handle_new_event(\n             event, destinations=destinations,\n         )\n+\n+    @defer.inlineCallbacks\n+    def maybe_kick_guest_users(self, event, current_state):",
+    "path": "synapse/handlers/_base.py",
+    "position": 15,
+    "original_position": 15,
+    "commit_id": "40308c0d094dcd1b2937e32570a18a061ba61e68",
+    "original_commit_id": "40308c0d094dcd1b2937e32570a18a061ba61e68",
+    "user": {
+      "login": "NegativeMjark",
+      "id": 904009,
+      "avatar_url": "https://avatars.githubusercontent.com/u/904009?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NegativeMjark",
+      "html_url": "https://github.com/NegativeMjark",
+      "followers_url": "https://api.github.com/users/NegativeMjark/followers",
+      "following_url": "https://api.github.com/users/NegativeMjark/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NegativeMjark/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NegativeMjark/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NegativeMjark/subscriptions",
+      "organizations_url": "https://api.github.com/users/NegativeMjark/orgs",
+      "repos_url": "https://api.github.com/users/NegativeMjark/repos",
+      "events_url": "https://api.github.com/users/NegativeMjark/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NegativeMjark/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "Might be nice to split this into a ``maybe_kick_guest_users`` and a ``kick_guest_users`` where the latter just takes the current_state and the user doing the kicking",
+    "created_at": "2015-11-09T17:41:40Z",
+    "updated_at": "2015-11-09T17:43:19Z",
+    "html_url": "https://github.com/matrix-org/synapse/pull/355#discussion_r44304591",
+    "pull_request_url": "https://api.github.com/repos/matrix-org/synapse/pulls/355",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/matrix-org/synapse/pulls/comments/44304591"
+      },
+      "html": {
+        "href": "https://github.com/matrix-org/synapse/pull/355#discussion_r44304591"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/matrix-org/synapse/pulls/355"
+      }
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/matrix-org/synapse/pulls/comments/44304903",
+    "id": 44304903,
+    "diff_hunk": "@@ -282,3 +284,41 @@ def log_failure(f):\n         federation_handler.handle_new_event(\n             event, destinations=destinations,\n         )\n+\n+    @defer.inlineCallbacks\n+    def maybe_kick_guest_users(self, event, current_state):\n+        # Technically this function invalidates current_state by changing it.\n+        # Hopefully this isn't that important to the caller.\n+        if event.type == EventTypes.GuestAccess:\n+            guest_access = event.content.get(\"guest_access\", \"forbidden\")\n+            if guest_access != \"can_join\":\n+                for member_event in current_state:\n+                    try:\n+                        if member_event.type != EventTypes.Member:\n+                            continue\n+                        if member_event.content[\"membership\"] not in {\n+                            Membership.JOIN,\n+                            Membership.INVITE\n+                        }:\n+                            continue\n+                        if (\n+                            \"kind\" not in member_event.content\n+                            or member_event.content[\"kind\"] != \"guest\"\n+                        ):\n+                            continue\n+                        message_handler = self.hs.get_handlers().message_handler\n+                        event = yield message_handler.create_and_send_event(\n+                            {\n+                                \"type\": EventTypes.Member,\n+                                \"state_key\": member_event.user_id,\n+                                \"content\": {\n+                                    \"membership\": Membership.LEAVE,\n+                                    \"kind\": \"guest\"\n+                                },\n+                                \"room_id\": event.room_id,\n+                                \"sender\": member_event.user_id",
+    "path": "synapse/handlers/_base.py",
+    "position": 45,
+    "original_position": 45,
+    "commit_id": "40308c0d094dcd1b2937e32570a18a061ba61e68",
+    "original_commit_id": "40308c0d094dcd1b2937e32570a18a061ba61e68",
+    "user": {
+      "login": "NegativeMjark",
+      "id": 904009,
+      "avatar_url": "https://avatars.githubusercontent.com/u/904009?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NegativeMjark",
+      "html_url": "https://github.com/NegativeMjark",
+      "followers_url": "https://api.github.com/users/NegativeMjark/followers",
+      "following_url": "https://api.github.com/users/NegativeMjark/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NegativeMjark/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NegativeMjark/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NegativeMjark/subscriptions",
+      "organizations_url": "https://api.github.com/users/NegativeMjark/orgs",
+      "repos_url": "https://api.github.com/users/NegativeMjark/repos",
+      "events_url": "https://api.github.com/users/NegativeMjark/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NegativeMjark/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "Shouldn't the ``sender`` be the user doing the kicking rather than the user being kicked.",
+    "created_at": "2015-11-09T17:44:15Z",
+    "updated_at": "2015-11-09T17:44:15Z",
+    "html_url": "https://github.com/matrix-org/synapse/pull/355#discussion_r44304903",
+    "pull_request_url": "https://api.github.com/repos/matrix-org/synapse/pulls/355",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/matrix-org/synapse/pulls/comments/44304903"
+      },
+      "html": {
+        "href": "https://github.com/matrix-org/synapse/pull/355#discussion_r44304903"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/matrix-org/synapse/pulls/355"
+      }
+    }
+  }
+]

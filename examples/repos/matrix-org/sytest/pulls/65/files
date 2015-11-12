@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "27f0c596ec86564cc362564ada5b3d1fcb5b6bb6",
+    "filename": "tests/10apidoc/03events-initial.pl",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 1,
+    "changes": 2,
+    "blob_url": "https://github.com/matrix-org/sytest/blob/697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7/tests/10apidoc/03events-initial.pl",
+    "raw_url": "https://github.com/matrix-org/sytest/raw/697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7/tests/10apidoc/03events-initial.pl",
+    "contents_url": "https://api.github.com/repos/matrix-org/sytest/contents/tests/10apidoc/03events-initial.pl?ref=697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7",
+    "patch": "@@ -142,7 +142,7 @@ sub await_event_for\n          my $found;\n          foreach my $event ( @_ ) {\n             not $found and $filter->( $event ) and\n-               $found = 1, next;\n+               $found = $event, next;\n \n             # Save it for later\n             push @{ $user->saved_events }, $event;"
+  },
+  {
+    "sha": "bd829dc4962171c679a0f5ea92fcda4cf83894fd",
+    "filename": "tests/10apidoc/33room-members.pl",
+    "status": "modified",
+    "additions": 1,
+    "deletions": 0,
+    "changes": 1,
+    "blob_url": "https://github.com/matrix-org/sytest/blob/697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7/tests/10apidoc/33room-members.pl",
+    "raw_url": "https://github.com/matrix-org/sytest/raw/697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7/tests/10apidoc/33room-members.pl",
+    "contents_url": "https://api.github.com/repos/matrix-org/sytest/contents/tests/10apidoc/33room-members.pl?ref=697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7",
+    "patch": "@@ -244,6 +244,7 @@ sub matrix_invite_user_to_room\n {\n    my ( $user, $invitee, $room_id ) = @_;\n    is_User( $user ) or croak \"Expected a User; got $user\";\n+   ref $room_id and croak \"Expected a room ID; got $room_id\";\n \n    my $invitee_id;\n    if( is_User( $invitee ) ) {"
+  },
+  {
+    "sha": "f217dfe9bedf6d127b69364d6bfb9f1abd822786",
+    "filename": "tests/30rooms/06invite.pl",
+    "status": "modified",
+    "additions": 77,
+    "deletions": 1,
+    "changes": 78,
+    "blob_url": "https://github.com/matrix-org/sytest/blob/697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7/tests/30rooms/06invite.pl",
+    "raw_url": "https://github.com/matrix-org/sytest/raw/697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7/tests/30rooms/06invite.pl",
+    "contents_url": "https://api.github.com/repos/matrix-org/sytest/contents/tests/30rooms/06invite.pl?ref=697f79c65c335c9dfbf01a6fb63c0cf6ca4ffce7",
+    "patch": "@@ -1,4 +1,4 @@\n-use List::Util qw( first );\n+use List::Util qw( all first );\n \n my $creator_fixture = local_user_fixture();\n \n@@ -87,6 +87,9 @@ sub inviteonly_room_fixture\n          $content->{membership} eq \"invite\" or\n             die \"Expected membership to be 'invite'\";\n \n+         require_json_keys( $event, qw( invite_room_state ));\n+         require_json_list( $event->{invite_room_state} );\n+\n          return 1;\n       });\n    };\n@@ -154,3 +157,76 @@ sub invited_user_can_reject_invite\n       Future->done(1);\n    });\n }\n+\n+test \"Invited user can see room metadata\",\n+   requires => [ local_user_and_room_fixtures(), local_user_fixture() ],\n+\n+   do => sub {\n+      my ( $creator, $room_id, $invitee ) = @_;\n+\n+      my $state_in_invite;\n+\n+      Future->needs_all(\n+         matrix_put_room_state( $creator, $room_id,\n+            type => \"m.room.name\",\n+            content => { name => \"The room name\" },\n+         ),\n+         matrix_put_room_state( $creator, $room_id,\n+            type => \"m.room.avatar\",\n+            content => { url => \"http://something\" },\n+         ),\n+      )->then( sub {\n+         matrix_invite_user_to_room( $creator, $invitee, $room_id );\n+      })->then( sub {\n+         await_event_for( $invitee, sub {\n+            my ( $event ) = @_;\n+            return $event->{type} eq \"m.room.member\" &&\n+                   $event->{room_id} eq $room_id;\n+         });\n+      })->then( sub {\n+         my ( $event ) = @_;\n+\n+         require_json_keys( $event, qw( invite_room_state ));\n+         my %state_by_type = map {\n+            $_->{type} => $_\n+         } @{ $event->{invite_room_state} };\n+\n+         $state_by_type{$_} or die \"Did not receive $_ state\"\n+            for qw( m.room.join_rules m.room.name m.room.canonical_alias m.room.avatar );\n+\n+         # Save just the 'content' keys\n+         $state_in_invite = { map {\n+            $_ => $state_by_type{$_}{content}\n+         } keys %state_by_type };\n+\n+         log_if_fail \"State content in invite\", $state_in_invite;\n+\n+         # Now compare it to the actual room state\n+\n+         Future->needs_all(\n+            map {\n+               my $type = $_;\n+               matrix_get_room_state( $creator, $room_id, type => $type )\n+                  ->then( sub {\n+                     my ( $content ) = @_;\n+                     Future->done( $type => $content );\n+                  });\n+            } keys %state_by_type\n+         )\n+      })->then( sub {\n+         my %got_state = @_;\n+\n+         log_if_fail \"State by direct room query\", \\%got_state;\n+\n+         # TODO: This would be a lot neater with is_deeply()\n+         foreach my $type ( keys %got_state ) {\n+            my $got       = $got_state{$type};\n+            my $in_invite = $state_in_invite->{$type};\n+\n+            all { $got->{$_} eq $in_invite->{$_} } keys %$got, keys %$in_invite or\n+               die \"Content does not match for type $type\";\n+         }\n+\n+         Future->done(1);\n+      });\n+   };"
+  }
+]

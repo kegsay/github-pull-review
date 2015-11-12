@@ -1,0 +1,74 @@
+[
+  {
+    "sha": "b10b2d0efae744eafa4e6c40e5f8915deebdd7ac",
+    "filename": "event-schemas/check_examples.py",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/c00abe9f2faa80f6cfcf7fba028de870eca676ac/event-schemas/check_examples.py",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/c00abe9f2faa80f6cfcf7fba028de870eca676ac/event-schemas/check_examples.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/event-schemas/check_examples.py?ref=c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "patch": "@@ -60,6 +60,8 @@ def check_example_dir(exampledir, schemadir):\n                 continue\n             examplepath = os.path.join(root, filename)\n             schemapath = examplepath.replace(exampledir, schemadir)\n+            if schemapath.find(\"#\") >= 0:\n+                schemapath = schemapath[:schemapath.find(\"#\")]\n             try:\n                 check_example_file(examplepath, schemapath)\n             except Exception as e:"
+  },
+  {
+    "sha": "e2ca56685e8180625ede698941454c9ebcfdab62",
+    "filename": "event-schemas/examples/v1/m.room.member#invite_room_state",
+    "status": "added",
+    "additions": 30,
+    "deletions": 0,
+    "changes": 30,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/c00abe9f2faa80f6cfcf7fba028de870eca676ac/event-schemas/examples/v1/m.room.member#invite_room_state",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/c00abe9f2faa80f6cfcf7fba028de870eca676ac/event-schemas/examples/v1/m.room.member#invite_room_state",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/event-schemas/examples/v1/m.room.member#invite_room_state?ref=c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "patch": "@@ -0,0 +1,30 @@\n+{\n+  \"age\": 242352,\n+  \"content\": {\n+    \"membership\": \"join\",\n+    \"avatar_url\": \"mxc://localhost/SEsfnsuifSDFSSEF#auto\",\n+    \"displayname\": \"Alice Margatroid\"\n+  },\n+  \"invite_room_state\": [\n+    {\n+      \"type\": \"m.room.name\",\n+      \"state_key\": \"\",\n+      \"content\": {\n+        \"name\": \"Forest of Magic\"\n+      }\n+    },\n+    {\n+      \"type\": \"m.room.join_rules\",\n+      \"state_key\": \"\",\n+      \"content\": {\n+        \"join_rules\": \"invite\"\n+      }\n+    }\n+  ],\n+  \"state_key\": \"@alice:localhost\",\n+  \"origin_server_ts\": 1431961217939,\n+  \"event_id\": \"$WLGTSEFSEF:localhost\",\n+  \"type\": \"m.room.member\",\n+  \"room_id\": \"!Cuyf34gef24t:localhost\",\n+  \"user_id\": \"@example:localhost\"\n+}"
+  },
+  {
+    "sha": "2457302ac89477417ee6c0975ac6c8a5c2748b13",
+    "filename": "event-schemas/examples/v1/m.room.member#third_party_invite",
+    "status": "added",
+    "additions": 25,
+    "deletions": 0,
+    "changes": 25,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/c00abe9f2faa80f6cfcf7fba028de870eca676ac/event-schemas/examples/v1/m.room.member#third_party_invite",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/c00abe9f2faa80f6cfcf7fba028de870eca676ac/event-schemas/examples/v1/m.room.member#third_party_invite",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/event-schemas/examples/v1/m.room.member#third_party_invite?ref=c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "patch": "@@ -0,0 +1,25 @@\n+{\n+  \"age\": 242352,\n+  \"content\": {\n+    \"membership\": \"join\",\n+    \"avatar_url\": \"mxc://localhost/SEsfnsuifSDFSSEF#auto\",\n+    \"displayname\": \"Alice Margatroid\",\n+    \"third_party_invite\": {\n+      \"signed\": {\n+        \"mxid\": \"@alice:localhost\",\n+        \"signatures\": {\n+          \"magic.forest\": {\n+            \"ed25519:3\": \"fQpGIW1Snz+pwLZu6sTy2aHy/DYWWTspTJRPyNp0PKkymfIsNffysMl6ObMMFdIJhk6g6pwlIqZ54rxo8SLmAg\"\n+          }\n+        },\n+        \"token\": \"abc123\"\n+      }\n+    }\n+  },\n+  \"state_key\": \"@alice:localhost\",\n+  \"origin_server_ts\": 1431961217939,\n+  \"event_id\": \"$WLGTSEFSEF:localhost\",\n+  \"type\": \"m.room.member\",\n+  \"room_id\": \"!Cuyf34gef24t:localhost\",\n+  \"user_id\": \"@example:localhost\"\n+}"
+  },
+  {
+    "sha": "78aabca761c29c4b467cd46c57667e21014d399e",
+    "filename": "templating/matrix_templates/sections.py",
+    "status": "modified",
+    "additions": 2,
+    "deletions": 2,
+    "changes": 4,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/c00abe9f2faa80f6cfcf7fba028de870eca676ac/templating/matrix_templates/sections.py",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/c00abe9f2faa80f6cfcf7fba028de870eca676ac/templating/matrix_templates/sections.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/templating/matrix_templates/sections.py?ref=c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "patch": "@@ -35,7 +35,7 @@ def _render_events(self, filterFn, sortFn):\n             if not filterFn(event_name):\n                 continue\n             sections.append(template.render(\n-                example=examples[event_name], \n+                examples=examples[event_name],\n                 event=schemas[event_name],\n                 title_kind=subtitle_title_char\n             ))\n@@ -136,7 +136,7 @@ def render_msgtype_events(self):\n             if not event_name.startswith(\"m.room.message#m.\"):\n                 continue\n             sections.append(template.render(\n-                example=examples[event_name], \n+                example=examples[event_name][0],\n                 event=schemas[event_name],\n                 title_kind=subtitle_title_char\n             ))"
+  },
+  {
+    "sha": "fbefe17f3c97b65854e917f74bd9081f4c1cdf3c",
+    "filename": "templating/matrix_templates/templates/events.tmpl",
+    "status": "modified",
+    "additions": 3,
+    "deletions": 1,
+    "changes": 4,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/c00abe9f2faa80f6cfcf7fba028de870eca676ac/templating/matrix_templates/templates/events.tmpl",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/c00abe9f2faa80f6cfcf7fba028de870eca676ac/templating/matrix_templates/templates/events.tmpl",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/templating/matrix_templates/templates/events.tmpl?ref=c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "patch": "@@ -21,8 +21,10 @@\n ======================= ================= ===========================================\n \n {% endfor %}\n-Example:\n+Example{% if examples | length > 1 %}s{% endif %}:\n \n+{% for example in examples %}\n .. code:: json\n \n     {{example | jsonify(4, 4)}}\n+{% endfor %}"
+  },
+  {
+    "sha": "94435c52ee9a77f886b7c5ed7fccf946fe102d24",
+    "filename": "templating/matrix_templates/units.py",
+    "status": "modified",
+    "additions": 8,
+    "deletions": 3,
+    "changes": 11,
+    "blob_url": "https://github.com/matrix-org/matrix-doc/blob/c00abe9f2faa80f6cfcf7fba028de870eca676ac/templating/matrix_templates/units.py",
+    "raw_url": "https://github.com/matrix-org/matrix-doc/raw/c00abe9f2faa80f6cfcf7fba028de870eca676ac/templating/matrix_templates/units.py",
+    "contents_url": "https://api.github.com/repos/matrix-org/matrix-doc/contents/templating/matrix_templates/units.py?ref=c00abe9f2faa80f6cfcf7fba028de870eca676ac",
+    "patch": "@@ -559,9 +559,14 @@ def load_event_examples(self):\n             if not filename.startswith(\"m.\"):\n                 continue\n             with open(os.path.join(path, filename), \"r\") as f:\n-                examples[filename] = json.loads(f.read())\n-                if filename == \"m.room.message#m.text\":\n-                    examples[\"m.room.message\"] = examples[filename]\n+                event_name = filename.split(\"#\")[0]\n+                example = json.loads(f.read())\n+\n+                examples[filename] = examples.get(filename, [])\n+                examples[filename].append(example)\n+                if filename != event_name:\n+                    examples[event_name] = examples.get(event_name, [])\n+                    examples[event_name].append(example)\n         return examples\n \n     def load_event_schemas(self):"
+  }
+]

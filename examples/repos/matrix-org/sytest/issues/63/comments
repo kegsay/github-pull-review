@@ -1,0 +1,30 @@
+[
+  {
+    "url": "https://api.github.com/repos/matrix-org/sytest/issues/comments/155833372",
+    "html_url": "https://github.com/matrix-org/sytest/pull/63#issuecomment-155833372",
+    "issue_url": "https://api.github.com/repos/matrix-org/sytest/issues/63",
+    "id": 155833372,
+    "user": {
+      "login": "leonerd",
+      "id": 350941,
+      "avatar_url": "https://avatars.githubusercontent.com/u/350941?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/leonerd",
+      "html_url": "https://github.com/leonerd",
+      "followers_url": "https://api.github.com/users/leonerd/followers",
+      "following_url": "https://api.github.com/users/leonerd/following{/other_user}",
+      "gists_url": "https://api.github.com/users/leonerd/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/leonerd/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/leonerd/subscriptions",
+      "organizations_url": "https://api.github.com/users/leonerd/orgs",
+      "repos_url": "https://api.github.com/users/leonerd/repos",
+      "events_url": "https://api.github.com/users/leonerd/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/leonerd/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "created_at": "2015-11-11T16:21:15Z",
+    "updated_at": "2015-11-11T16:21:15Z",
+    "body": "Additionally, the filter condition tests for uses of `await_event_for()` are now explicitly doing `return 0` rather than just returning an empty value that gets treated as false."
+  }
+]
