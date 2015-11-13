@@ -85,6 +85,56 @@ table td:first-child {
     background-color: #bd2c00;
 }
 
+.MergeButton_mergable {
+    background-color: #6cc644;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.MergeButton_merging {
+    background-color: #ccc;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: progress;
+}
+
+.MergeButton_error {
+    background-color: #000;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+span.link {
+    text-decoration: underline;
+    cursor: pointer;
+    color: -webkit-link;
+}
+
+.MergeOptionContainer {
+    margin-top: 1em;
+    line-height: 1.8;
+}
+
 
 
 .CommentBox_textarea {
