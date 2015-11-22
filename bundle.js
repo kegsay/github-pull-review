@@ -83,7 +83,7 @@ ReactDOM.render(React.createElement(
 module.exports = {
     ctrl: ctrl
 };
-},{"./logic/controller":15,"./logic/diff-controller":16,"./logic/dispatcher":17,"./logic/github-api":18,"./logic/list-controller":19,"./logic/session-store":31,"./pages/actions":32,"./pages/commits":33,"./pages/diffs":34,"./pages/history":35,"./pages/list":36,"./pages/merge":37,"./pages/pr":38,"./pages/root":39,"react":585,"react-dom":384,"react-router":404}],2:[function(require,module,exports){
+},{"./logic/controller":14,"./logic/diff-controller":15,"./logic/dispatcher":16,"./logic/github-api":17,"./logic/list-controller":18,"./logic/session-store":30,"./pages/actions":32,"./pages/commits":33,"./pages/diffs":34,"./pages/history":35,"./pages/list":36,"./pages/merge":37,"./pages/pr":38,"./pages/root":39,"react":585,"react-dom":384,"react-router":404}],2:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -238,7 +238,7 @@ module.exports = React.createClass({ displayName: 'CommentDiffListView',
         );
     }
 });
-},{"../logic/models/patch":26,"./comment-view":5,"./patch-view":11,"react":585}],4:[function(require,module,exports){
+},{"../logic/models/patch":25,"./comment-view":5,"./patch-view":11,"react":585}],4:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -393,7 +393,7 @@ module.exports = React.createClass({ displayName: 'CommentView',
         );
     }
 });
-},{"../logic/models/line-comment":24,"react":585}],6:[function(require,module,exports){
+},{"../logic/models/line-comment":23,"react":585}],6:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -505,7 +505,8 @@ var FileDiffView = require("./file-diff-view");
 module.exports = React.createClass({ displayName: 'FileDiffListView',
     propTypes: {
         onReplyToComment: React.PropTypes.func.isRequired,
-        onLineComment: React.PropTypes.func.isRequired
+        onLineComment: React.PropTypes.func.isRequired,
+        controller: React.PropTypes.any.isRequired
     },
 
     render: function render() {
@@ -535,6 +536,7 @@ module.exports = React.createClass({ displayName: 'FileDiffListView',
                         pr: self.props.pr,
                         onReplyToComment: self.props.onReplyToComment,
                         onLineComment: self.props.onLineComment,
+                        controller: self.props.controller,
                         key: i });
                 })
             )
@@ -545,11 +547,8 @@ module.exports = React.createClass({ displayName: 'FileDiffListView',
 "use strict";
 
 var React = require("react");
-var dispatcher = require("../logic/dispatcher");
-var actions = require("../logic/actions");
 var PatchView = require("./patch-view");
 var CommentDiffListView = require("./comment-diff-list-view");
-var ActionMixin = require("../logic/actions").ActionMixin(["file_diffs", "get_commit_diffs_response"]);
 
 function CommitLabel(sha, label) {
     this.label = label;
@@ -557,11 +556,14 @@ function CommitLabel(sha, label) {
 }
 
 module.exports = React.createClass({ displayName: 'FileDiffView',
-    mixins: [ActionMixin],
 
     propTypes: {
         onReplyToComment: React.PropTypes.func.isRequired,
-        onLineComment: React.PropTypes.func.isRequired
+        onLineComment: React.PropTypes.func.isRequired,
+        pr: React.PropTypes.any.isRequired,
+        comments: React.PropTypes.array.isRequired,
+        diff: React.PropTypes.any.isRequired,
+        controller: React.PropTypes.any.isRequired
     },
 
     getInitialState: function getInitialState() {
@@ -629,12 +631,14 @@ module.exports = React.createClass({ displayName: 'FileDiffView',
     },
 
     _updateDiff: function _updateDiff(fromSha, toSha) {
-        dispatcher.dispatch(actions.create("get_commit_diffs", {
-            pr: this.props.pr,
-            from: fromSha,
-            to: toSha,
-            file_path: this.props.diff.getFilePathString()
-        }));
+        var self = this;
+        this.props.controller.getCommitDiffs(this.props.pr.getRepo(), fromSha, toSha, this.props.diff.getFilePathString()).done(function (diff) {
+            self.setState({
+                selectedDiff: diff
+            });
+        }, function (err) {
+            console.error("Failed to get commit diffs: %s", err);
+        });
     },
 
     onCommitChange: function onCommitChange(isFrom, event) {
@@ -670,18 +674,6 @@ module.exports = React.createClass({ displayName: 'FileDiffView',
                 this._updateDiff(this.state.fromSha, newSha);
             }
         }
-    },
-
-    onReceiveAction: function onReceiveAction(action, data) {
-        if (action !== "get_commit_diffs_response") {
-            return;
-        }
-        if (data.diff.getFilePathString() !== this.props.diff.getFilePathString()) {
-            return;
-        }
-        this.setState({
-            selectedDiff: data.diff
-        });
     },
 
     toggleVisible: function toggleVisible() {
@@ -911,7 +903,7 @@ module.exports = React.createClass({ displayName: 'FileDiffView',
         );
     }
 });
-},{"../logic/actions":13,"../logic/dispatcher":17,"./comment-diff-list-view":3,"./patch-view":11,"react":585}],10:[function(require,module,exports){
+},{"./comment-diff-list-view":3,"./patch-view":11,"react":585}],10:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -1358,7 +1350,7 @@ module.exports = React.createClass({ displayName: 'PatchView',
         );
     }
 });
-},{"../logic/models/line":25,"../logic/models/patch":26,"./comment-box":2,"./comment-view":5,"react":585}],12:[function(require,module,exports){
+},{"../logic/models/line":24,"../logic/models/patch":25,"./comment-box":2,"./comment-view":5,"react":585}],12:[function(require,module,exports){
 "use strict";
 
 var marked = require("marked");
@@ -1402,129 +1394,6 @@ module.exports.timeAgo = function (ts) {
     return Math.floor(seconds) + " seconds";
 };
 },{"marked":383}],13:[function(require,module,exports){
-"use strict";
-
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
-var dispatcher = require("./dispatcher");
-
-// Format: <action_name> : <action_data>
-var actions = {
-    view_pr: {
-        repo_id: "string",
-        request_id: "string"
-    },
-    token_update: {
-        token: "string"
-    },
-    post_comment: {
-        comment_id: "string",
-        pr: "object", // PullRequest
-        text: "string",
-        in_reply_to: "object", // LineComment
-        path: "string",
-        pos: "number"
-    },
-    post_comment_response: {
-        comment_id: "string",
-        response: "string",
-        is_error: "boolean"
-    },
-    pr_info: {
-        pr: "object" // PullRequest
-    },
-    get_diffs: {
-        repo: "string",
-        id: "string",
-        allow_cached: "boolean"
-    },
-    file_diffs: {
-        files: "object" // actually a list of FileDiffs
-    },
-    line_comments: {
-        comments: "object" // actually a list of LineComments
-    },
-    get_commit_diffs: {
-        pr: "object", // PullRequest
-        from: "string", // sha
-        to: "string", // sha
-        file_path: "string"
-    },
-    get_commit_diffs_response: {
-        diff: "object" // FileDiff
-    },
-    pr_list: {
-        myPulls: "object",
-        assignedPulls: "object",
-        error: "string"
-    }
-};
-
-function checkAction(name, data) {
-    var schema = actions[name];
-    if (!schema) {
-        throw new Error("Action '" + name + "' has not been added to actions.js");
-    }
-    if (!data) {
-        throw new Error("Action '" + name + "' has no data property.");
-    }
-    Object.keys(schema).forEach(function (key) {
-        if (_typeof(data[key]) !== schema[key]) {
-            throw new Error("Action '" + name + "' was emitted but failed to pass " + "the schema. Expected '" + key + "' to be of type " + schema[key] + " but was actually of type " + _typeof(data[key]));
-        }
-    });
-}
-
-module.exports = {
-
-    create: function create(name, data) {
-        checkAction(name, data);
-        return {
-            action: name,
-            data: data
-        };
-    },
-
-    ActionMixin: function ActionMixin(actionsToMonitor) {
-        actionsToMonitor = actionsToMonitor || [];
-
-        actionsToMonitor.forEach(function (a) {
-            if (Object.keys(actions).indexOf(a) === -1) {
-                throw new Error("ActionMixin: Told to monitor an unknown action '" + a + "'. Did you add it to actions.js?");
-            }
-        });
-
-        return {
-            componentDidMount: function componentDidMount() {
-                this._dispatcherRef = dispatcher.register(this.onAction);
-            },
-
-            componentWillUnmount: function componentWillUnmount() {
-                dispatcher.unregister(this._dispatcherRef);
-            },
-
-            onAction: function onAction(payload) {
-                if (actionsToMonitor.indexOf(payload.action) !== -1) {
-                    var state = {};
-                    state[payload.action] = payload.data;
-                    this.setState(state);
-                    if (this.onReceiveAction) {
-                        this.onReceiveAction(payload.action, payload.data);
-                    }
-                }
-            },
-
-            getInitialState: function getInitialState() {
-                var initial = {};
-                actionsToMonitor.forEach(function (a) {
-                    initial[a] = {};
-                });
-                return initial;
-            }
-        };
-    }
-};
-},{"./dispatcher":17}],14:[function(require,module,exports){
 "use strict";
 
 var Comment = require("./models/comment");
@@ -1634,11 +1503,11 @@ module.exports.getRepoFromGithubApi = getRepoFromGithubApi;
 module.exports.getRefFromGithubApi = function (apiRef) {
     return new Ref(getRepoFromGithubApi(apiRef.repo), getUserFromGithubApi(apiRef.user), apiRef.label, apiRef.sha, apiRef.ref);
 };
-},{"./models/comment":21,"./models/commit":22,"./models/file-diff":23,"./models/line-comment":24,"./models/patch":26,"./models/ref":28,"./models/repo":29,"./models/user":30}],15:[function(require,module,exports){
+},{"./models/comment":20,"./models/commit":21,"./models/file-diff":22,"./models/line-comment":23,"./models/patch":25,"./models/ref":27,"./models/repo":28,"./models/user":29}],14:[function(require,module,exports){
 "use strict";
 
 var Promise = require("bluebird");
-var actions = require("./actions");
+var triggers = require("./triggers");
 var apiMapper = require("./api-mapper");
 var PullRequest = require("./models/pull-request");
 
@@ -1658,29 +1527,16 @@ Controller.prototype.getPullRequest = function () {
 };
 
 Controller.prototype.onAction = function (payload) {
-    var data = payload.data;
-    switch (payload.action) {
-        case "get_commit_diffs":
-            this._get_commit_diffs(data.pr.getRepo(), data.from, data.to, data.file_path);
-            break;
-        case "get_diffs":
-            this._get_diffs(data);
-            this._get_diff_comments(data);
-            break;
+    switch (payload.name) {
         default:
             // do nothing
             break;
     }
 };
 
-Controller.prototype.getRequestDiffs = function (repo, pr, allowCached) {
-    var data = {
-        repo: repo,
-        id: pr,
-        allow_cached: allowCached
-    };
-    this._get_diffs(data);
-    this._get_diff_comments(data);
+Controller.prototype.getRequestDiffs = function (repo, prId, allowCached) {
+    this._get_diffs(repo, prId, allowCached);
+    this._get_diff_comments(repo, prId);
 };
 
 Controller.prototype.updateAccessToken = function (token) {
@@ -1700,43 +1556,30 @@ Controller.prototype.postReplyLineComment = function (pr, text, inReplyTo) {
     var self = this;
     var promise = this.httpApi.postLineCommentResponse(pr.getRepo(), pr.getId(), text, inReplyTo.getComment().getId());
     promise.finally(function () {
-        self._refreshDiffs(pr);
+        self.getRequestDiffs(pr.getRepo(), pr.getId(), false);
     });
     return promise;
-};
-
-Controller.prototype._refreshDiffs = function (pr) {
-    this.dispatcher.dispatch(actions.create("get_diffs", {
-        repo: pr.getRepo(),
-        id: pr.getId(),
-        allow_cached: false
-    }));
 };
 
 Controller.prototype.postLineComment = function (pr, text, path, pos) {
     var self = this;
     var promise = this.httpApi.postLineComment(pr.getRepo(), pr.getId(), text, pr.getSource().getSha(), path, pos);
     promise.finally(function () {
-        self._refreshDiffs(pr);
+        self.getRequestDiffs(pr.getRepo(), pr.getId(), false);
     });
     return promise;
 };
 
-Controller.prototype._get_commit_diffs = function (repo, fromSha, toSha, filePath) {
+Controller.prototype.getCommitDiffs = function (repo, fromSha, toSha, filePath) {
     var self = this;
-    Promise.try(function () {
+    return Promise.try(function () {
         return self.httpApi.getCommitDiffs(repo, fromSha, toSha);
-    }).done(function (apiDiffs) {
+    }).then(function (apiDiffs) {
         var diffs = apiMapper.getCommitDiffsFromGithubApi(apiDiffs.body);
         diffs = diffs.filter(function (diff) {
             return diff.getFilePath() === filePath;
         });
-        self.dispatcher.dispatch(actions.create("get_commit_diffs_response", {
-            diff: diffs[0]
-        }));
-    }, function (e) {
-        console.error("Failed to get commit diffs on %s between %s and %s", repo, fromSha, toSha);
-        console.error(e.stack);
+        return diffs[0];
     });
 };
 
@@ -1771,12 +1614,10 @@ Controller.prototype.retrievePullRequest = function (repo, pr, dispatch) {
             pullRequest.setMergeable(body.mergeable);
         }
         if (dispatch) {
-            console.log("Dispatching pr_info");
+            console.log("Dispatching PullRequestTrigger");
             self._currentPullRequest = pullRequest;
-            self.dispatcher.dispatch(actions.create("pr_info", {
-                pr: pullRequest
-            }));
-            console.log("Dispatched pr_info");
+            self.dispatcher.dispatch(new triggers.PullRequestTrigger(pullRequest));
+            console.log("Dispatched PullRequestTrigger");
         }
         return pullRequest;
     }, function (err) {
@@ -1784,27 +1625,27 @@ Controller.prototype.retrievePullRequest = function (repo, pr, dispatch) {
     });
 };
 
-Controller.prototype._get_diffs = function (data) {
+Controller.prototype.refresh = function () {
+    this.retrievePullRequest(this.getPullRequest().getRepo(), this.getPullRequest().getId(), true);
+};
+
+Controller.prototype._get_diffs = function (repo, id, allowCached) {
     var self = this;
-    this.diffController.getPullRequestDiffs(data.repo, data.id, data.allow_cached).done(function (diffs) {
-        self.dispatcher.dispatch(actions.create("file_diffs", {
-            files: diffs
-        }));
+    this.diffController.getPullRequestDiffs(repo, id, allowCached).done(function (diffs) {
+        self.dispatcher.dispatch(new triggers.FileDiffsTrigger(diffs));
     }, function (e) {
         console.error("Err getting diffs: %s", JSON.stringify(e));
         console.error(e.stack);
     });
 };
 
-Controller.prototype._get_diff_comments = function (data) {
+Controller.prototype._get_diff_comments = function (repo, prId) {
     var self = this;
     Promise.try(function () {
-        return self.httpApi.getLineComments(data.repo, data.id);
+        return self.httpApi.getLineComments(repo, prId);
     }).done(function (apiData) {
         var lineComments = apiMapper.getLineCommentsFromGithubApi(apiData.body);
-        self.dispatcher.dispatch(actions.create("line_comments", {
-            comments: lineComments
-        }));
+        self.dispatcher.dispatch(new triggers.LineCommentsTrigger(lineComments));
     }, function (err) {
         console.error("Err getting line comments: " + err);
         console.error(err.stack);
@@ -1814,22 +1655,49 @@ Controller.prototype._get_diff_comments = function (data) {
 Controller.prototype.squashMergeWithRewrite = function (pr, commitMessage) {
     var _this = this;
 
-    return this.httpApi.squashBranch(pr.getSource().getRepo().getCloneUrl(), pr.getSource().getRef(), pr.getDest().getRepo().getCloneUrl(), pr.getDest().getRef(), commitMessage).delay(200) // Github's API isn't great at noticing a new head sha.
+    return Promise.try(function () {
+        return _this.httpApi.squashBranch(pr.getSource().getRepo().getCloneUrl(), pr.getSource().getRef(), pr.getDest().getRepo().getCloneUrl(), pr.getDest().getRef(), commitMessage);
+    }).delay(200) // Github's API isn't great at noticing a new head sha.
     .then(function (apiData) {
         return _this.merge(pr, commitMessage, apiData.body.sha);
+    }).delay(1000).then(function () {
+        return _this.refresh();
+    }).catch(function (err) {
+        return _this._handleMergeError(err);
     });
 };
 
 Controller.prototype.squashMergeWithoutRewrite = function (pr, commitMessage) {
-    return this.httpApi.squashMerge(pr.getSource().getRepo().getCloneUrl(), pr.getSource().getRef(), pr.getDest().getRepo().getCloneUrl(), pr.getDest().getRef(), commitMessage);
+    var _this2 = this;
+
+    return Promise.try(function () {
+        return _this2.httpApi.squashMerge(pr.getSource().getRepo().getCloneUrl(), pr.getSource().getRef(), pr.getDest().getRepo().getCloneUrl(), pr.getDest().getRef(), commitMessage);
+    }).delay(1000).then(function () {
+        return _this2.refresh();
+    }).catch(function (err) {
+        return _this2._handleMergeError(err);
+    });
 };
 
 Controller.prototype.merge = function (pr, commitMessage, opt_sha) {
-    return this.httpApi.merge(pr.getRepo(), pr.getId(), opt_sha || pr.getSource().getSha(), commitMessage);
+    var _this3 = this;
+
+    return Promise.try(function () {
+        return _this3.httpApi.merge(pr.getRepo(), pr.getId(), opt_sha || pr.getSource().getSha(), commitMessage);
+    }).delay(1000).then(function () {
+        return _this3.refresh();
+    }).catch(function (err) {
+        return _this3._handleMergeError(err);
+    });
+};
+
+Controller.prototype._handleMergeError = function (err) {
+    console.error("Got merge error: %s", JSON.stringify(err));
+    this.dispatcher.dispatch(new triggers.MergeErrorTrigger({ "error": "Error merging" }));
 };
 
 module.exports = Controller;
-},{"./actions":13,"./api-mapper":14,"./models/pull-request":27,"bluebird":40}],16:[function(require,module,exports){
+},{"./api-mapper":13,"./models/pull-request":26,"./triggers":31,"bluebird":40}],15:[function(require,module,exports){
 "use strict";
 
 var Promise = require("bluebird");
@@ -1855,13 +1723,13 @@ DiffController.prototype.getPullRequestDiffs = function (repo, pr, allowCached) 
 };
 
 module.exports = DiffController;
-},{"./api-mapper":14,"bluebird":40}],17:[function(require,module,exports){
+},{"./api-mapper":13,"bluebird":40}],16:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require("flux").Dispatcher;
 
 module.exports = new Dispatcher();
-},{"flux":243}],18:[function(require,module,exports){
+},{"flux":243}],17:[function(require,module,exports){
 "use strict";
 
 var request = require("request");
@@ -2056,10 +1924,10 @@ GithubApi.prototype._req = function (method, url, data, skipAuth) {
 };
 
 module.exports = GithubApi;
-},{"bluebird":40,"request":586}],19:[function(require,module,exports){
+},{"bluebird":40,"request":586}],18:[function(require,module,exports){
 "use strict";
 
-var actions = require("./actions");
+var triggers = require("./triggers");
 var Promise = require("bluebird");
 var apiMapper = require("./api-mapper");
 
@@ -2079,28 +1947,16 @@ ListController.prototype.getOpenPullRequests = function () {
                 }).then(self._loadMyPulls), self.httpApi.getOpenPullRequests(userData.body.login, "assignee").then(function (prs) {
                     return self._fillComments(prs);
                 }).then(self._loadAssignedPulls), function (myPRs, assignedPRs) {
-                    return self.dispatcher.dispatch(actions.create("pr_list", {
-                        myPulls: myPRs,
-                        assignedPulls: assignedPRs,
-                        error: ""
-                    }));
+                    return self.dispatcher.dispatch(new triggers.PullRequestListTrigger(myPRs, assignedPRs));
                 });
             }).catch(function (err) {
                 console.error(err);
-                return self.dispatcher.dispatch(actions.create("pr_list", {
-                    myPulls: null,
-                    assignedPulls: null,
-                    error: typeof err === "string" ? err : "Unexpected error getting pull requests"
-                }));
+                return self.dispatcher.dispatch(new triggers.PullRequestListTrigger(null, null, typeof err === "string" ? err : "Unexpected error getting pull requests"));
             });
         });
     }).catch(function (err) {
         console.error(err);
-        self.dispatcher.dispatch(actions.create("pr_list", {
-            myPulls: null,
-            assignedPulls: null,
-            error: err.statusCode === 401 ? "Error getting user details - try entering a valid access token" : "Unexpected error getting user details"
-        }));
+        self.dispatcher.dispatch(new triggers.PullRequestListTrigger(null, null, err.statusCode === 401 ? "Error getting user details - try entering a valid access token" : "Unexpected error getting user details"));
     });
 };
 
@@ -2142,7 +1998,7 @@ ListController.prototype._loadAssignedPulls = function (prs) {
         if (pr.getOwner().equals(me)) {
             // PR will appear in my pulls, don't duplicate it in assigned pulls
             continue;
-        } else if (pr.getOwner().equals(pr.getLastCommenter())) {
+        } else if (pr.getOwner().equals(pr.getLastCommenter()) && pr.getActionsToDo().length === 0) {
             assignedPulls.assignedNeedsAction.push(pr);
         } else if (!me.equals(pr.getLastCommenter())) {
             assignedPulls.assignedOthersInvolved.push(pr);
@@ -2181,415 +2037,565 @@ ListController.prototype._fillComments = function (searchData) {
 };
 
 module.exports = ListController;
-},{"./actions":13,"./api-mapper":14,"bluebird":40}],20:[function(require,module,exports){
+},{"./api-mapper":13,"./triggers":31,"bluebird":40}],19:[function(require,module,exports){
 "use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var React = require("react"); // eslint-disable-line
 
-function Action(owner) {
-    this.owner = owner;
-    this.comments = [];
-    this.done = false;
-}
+var Action = (function () {
+    function Action(owner) {
+        _classCallCheck(this, Action);
 
-Action.prototype.addComment = function (comment) {
-    this.comments.push(comment);
-};
+        this.owner = owner;
+        this.comments = [];
+        this.done = false;
+    } // FIXME
 
-Action.prototype.addComments = function (comments) {
-    var self = this;
-    comments.forEach(function (c) {
-        self.addComment(c);
-    });
-};
-
-Action.prototype.isDone = function () {
-    return this.done;
-};
-
-Action.prototype.setDone = function (done) {
-    this.done = done;
-};
-
-Action.prototype.getHeadComment = function () {
-    return this.comments[0];
-};
-
-Action.prototype.getComments = function () {
-    return this.comments;
-};
-
-/**
- * Convert a list of LineComments into a list of Actions.
- * @param {LineComment[]} cmts A list of line comments
- * @return {Action[]} A list of actions or an empty list
- */
-Action.fromLineComments = function (cmts) {
-    // Create a new Action for each set of line comments on the same line.
-    var actions = [];
-    var comments = cmts;
-    for (var i = 0; i < comments.length; i++) {
-        var currentComment = comments[i];
-        var relatedComments = [];
-        var lastComment = null;
-        for (var j = i + 1; j < comments.length; j++) {
-            var testComment = comments[j];
-            if (currentComment.matches(testComment)) {
-                comments.splice(j--, 1); // remove the matching comment
-                relatedComments.push(testComment);
-                lastComment = testComment;
-            }
+    _createClass(Action, [{
+        key: "addComment",
+        value: function addComment(comment) {
+            // FIXME
+            this.comments.push(comment);
         }
-        var action = new Action(currentComment.getComment().getUser());
-        action.addComment(currentComment);
-        action.addComments(relatedComments);
-        if (lastComment) {
-            // see if we can mark it as done
-            var body = lastComment.getComment().getBody();
-            if (/^([^\n]*\n)*done\b/i.test(body) || /^([^\n]*\n)*fixed\b/i.test(body)) {
-                action.setDone(true);
-            }
+    }, {
+        key: "addComments",
+        value: function addComments(comments) {
+            // FIXME
+            var self = this;
+            comments.forEach(function (c) {
+                self.addComment(c);
+            });
         }
-        actions.push(action);
-    }
-    console.log("Action.fromLineComments => %s => %s actions", cmts.length, actions.length);
-    return actions;
-};
+    }, {
+        key: "isDone",
+        value: function isDone() {
+            return this.done;
+        }
+    }, {
+        key: "setDone",
+        value: function setDone(done) {
+            this.done = done;
+        }
+    }, {
+        key: "getHeadComment",
+        value: function getHeadComment() {
+            // FIXME
+            return this.comments[0];
+        }
+    }, {
+        key: "getComments",
+        value: function getComments() {
+            // FIXME
+            return this.comments;
+        }
+
+        /**
+         * Convert a list of LineComments into a list of Actions.
+         * @param {LineComment[]} cmts A list of line comments
+         * @return {Action[]} A list of actions or an empty list
+         */
+
+    }], [{
+        key: "fromLineComments",
+        value: function fromLineComments(cmts) {
+            // FIXME
+            // Create a new Action for each set of line comments on the same line.
+            var actions = [];
+            var comments = cmts;
+            for (var i = 0; i < comments.length; i++) {
+                var currentComment = comments[i];
+                var relatedComments = [];
+                var lastComment = null;
+                for (var j = i + 1; j < comments.length; j++) {
+                    var testComment = comments[j];
+                    if (currentComment.matches(testComment)) {
+                        comments.splice(j--, 1); // remove the matching comment
+                        relatedComments.push(testComment);
+                        lastComment = testComment;
+                    }
+                }
+                var action = new Action(currentComment.getComment().getUser());
+                action.addComment(currentComment);
+                action.addComments(relatedComments);
+                if (lastComment) {
+                    // see if we can mark it as done
+                    var body = lastComment.getComment().getBody();
+                    if (/^([^\n]*\n)*done\b/i.test(body) || /^([^\n]*\n)*fixed\b/i.test(body)) {
+                        action.setDone(true);
+                    }
+                }
+                actions.push(action);
+            }
+            console.log("Action.fromLineComments => %s => %s actions", cmts.length, actions.length);
+            return actions;
+        }
+    }]);
+
+    return Action;
+})();
 
 module.exports = Action;
-},{"react":585}],21:[function(require,module,exports){
+},{"react":585}],20:[function(require,module,exports){
 "use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var utils = require("../../components/utils");
 
-function Comment(id, user, body, ts, link) {
-    this.id = id;
-    this.ts = ts;
-    this.body = body;
-    this.user = user;
-    this.link = link;
-}
+var Comment = (function () {
+    function Comment(id, user, body, ts, link) {
+        _classCallCheck(this, Comment);
 
-Comment.prototype.getId = function () {
-    return this.id;
-};
+        // FIXME
+        this.id = id;
+        this.ts = ts;
+        this.body = body;
+        this.user = user;
+        this.link = link;
+    } // FIXME
 
-Comment.prototype.getLink = function () {
-    return this.link;
-};
+    _createClass(Comment, [{
+        key: "getId",
+        value: function getId() {
+            return this.id;
+        }
+    }, {
+        key: "getLink",
+        value: function getLink() {
+            return this.link;
+        }
+    }, {
+        key: "getBody",
+        value: function getBody() {
+            return this.body;
+        }
+    }, {
+        key: "getHtmlBody",
+        value: function getHtmlBody() {
+            if (!this.body) {
+                return "<p><i>No comment provided.</i></p>";
+            }
+            return utils.markdownToHtml(this.body);
+        }
+    }, {
+        key: "getUser",
+        value: function getUser() {
+            // FIXME
+            return this.user;
+        }
+    }, {
+        key: "getTimeAgo",
+        value: function getTimeAgo() {
+            return utils.timeAgo(this.ts);
+        }
+    }]);
 
-Comment.prototype.getBody = function () {
-    return this.body;
-};
-
-Comment.prototype.getHtmlBody = function () {
-    if (!this.body) {
-        return "<p><i>No comment provided.</i></p>";
-    }
-    return utils.markdownToHtml(this.body);
-};
-
-Comment.prototype.getUser = function () {
-    return this.user;
-};
-
-Comment.prototype.getTimeAgo = function () {
-    return utils.timeAgo(this.ts);
-};
+    return Comment;
+})();
 
 module.exports = Comment;
-},{"../../components/utils":12}],22:[function(require,module,exports){
+},{"../../components/utils":12}],21:[function(require,module,exports){
 "use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var React = require("react"); // eslint-disable-line
 var utils = require("../../components/utils");
 
-function Commit(sha, msg, ts, url, user) {
-    this.sha = sha;
-    this.msg = msg;
-    this.ts = ts;
-    this.url = url;
-    this.user = user;
-}
+var Commit = (function () {
+    // FIXME
 
-Commit.prototype.getMessage = function () {
-    return this.msg;
-};
+    function Commit(sha, msg, ts, url, user) {
+        _classCallCheck(this, Commit);
 
-Commit.prototype.getTimeAgo = function () {
-    return utils.timeAgo(this.ts);
-};
-
-Commit.prototype.getShaLinkJsx = function () {
-    return React.createElement(
-        "a",
-        { href: this.url, target: "_blank" },
-        this.getShortSha()
-    );
-};
-
-Commit.prototype.getTitle = function () {
-    // the first line of the message
-    return this.msg.split("\n")[0];
-};
-
-Commit.prototype.getHtmlDescription = function () {
-    // the entire message except the first line
-    var lines = this.msg.split("\n");
-    lines.shift(); // kill the title
-    if (lines.length === 0) {
-        return null;
+        // FIXME
+        this.sha = sha;
+        this.msg = msg;
+        this.ts = ts;
+        this.url = url;
+        this.user = user;
     }
-    return utils.markdownToHtml(lines.join("\n"));
-};
 
-Commit.prototype.getAuthorLinkJsx = function () {
-    return this.user.getUserLinkJsx();
-};
+    _createClass(Commit, [{
+        key: "getMessage",
+        value: function getMessage() {
+            return this.msg;
+        }
+    }, {
+        key: "getTimeAgo",
+        value: function getTimeAgo() {
+            return utils.timeAgo(this.ts);
+        }
+    }, {
+        key: "getShaLinkJsx",
+        value: function getShaLinkJsx() {
+            // FIXME JSX?
+            return React.createElement(
+                "a",
+                { href: this.url, target: "_blank" },
+                this.getShortSha()
+            );
+        }
+    }, {
+        key: "getTitle",
+        value: function getTitle() {
+            // the first line of the message
+            return this.msg.split("\n")[0];
+        }
+    }, {
+        key: "getHtmlDescription",
+        value: function getHtmlDescription() {
+            // the entire message except the first line
+            var lines = this.msg.split("\n");
+            lines.shift(); // kill the title
+            if (lines.length === 0) {
+                return null;
+            }
+            return utils.markdownToHtml(lines.join("\n"));
+        }
+    }, {
+        key: "getAuthorLinkJsx",
+        value: function getAuthorLinkJsx() {
+            // FIXME JSX?
+            return this.user.getUserLinkJsx();
+        }
+    }, {
+        key: "getShortSha",
+        value: function getShortSha() {
+            return this.sha.substring(0, 7);
+        }
+    }, {
+        key: "getSha",
+        value: function getSha() {
+            return this.sha;
+        }
+    }, {
+        key: "getUser",
+        value: function getUser() {
+            // FIXME
+            return this.user;
+        }
+    }]);
 
-Commit.prototype.getShortSha = function () {
-    return this.sha.substring(0, 7);
-};
-
-Commit.prototype.getSha = function () {
-    return this.sha;
-};
-
-Commit.prototype.getUser = function () {
-    return this.user;
-};
+    return Commit;
+})();
 
 module.exports = Commit;
-},{"../../components/utils":12,"react":585}],23:[function(require,module,exports){
+},{"../../components/utils":12,"react":585}],22:[function(require,module,exports){
 "use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Patch = require("./patch");
 
-/**
- * Construct a new File Diff.
- * @param {string} filePath The file path with diffs
- * @param {string} status Enum of {@link Diff.STATUS}
- * @param {string} patch The raw .patch
- * @param {Object=} lineCounts Summary line counts for this file.
- * @param {number} lineCounts.additions The number of lines added.
- * @param {number} lineCounts.deletions The number of lines removed.
- * @param {number} lineCounts.changes The number of lines changed.
- * @param {string=} prevFilename Previous file name, if any.
- * @param {string=} link The link to view the file at this commit.
- */
-function FileDiff(filePath, status, patch, lineCounts, prevFilename, link) {
-    this.rawPatch = patch;
-    this.file = filePath;
-    this.prevFile = prevFilename;
-    this.status = status;
-    this.link = link;
-    lineCounts = lineCounts || {
-        additions: 0,
-        deletions: 0,
-        changes: 0
-    };
-    this.additions = lineCounts.additions;
-    this.deletions = lineCounts.deletions;
-    this.changes = lineCounts.changes;
-    if (FileDiff.STATUSES.indexOf(status) === -1) {
-        throw new Exception("Bad FileDiff status: " + status);
+var FileDiff = (function () {
+    // FIXME
+
+    /**
+     * Construct a new File Diff.
+     * @param {string} filePath The file path with diffs
+     * @param {string} status Enum of {@link Diff.STATUS}
+     * @param {string} patch The raw .patch
+     * @param {Object=} lineCounts Summary line counts for this file.
+     * @param {number} lineCounts.additions The number of lines added.
+     * @param {number} lineCounts.deletions The number of lines removed.
+     * @param {number} lineCounts.changes The number of lines changed.
+     * @param {string=} prevFilename Previous file name, if any.
+     * @param {string=} link The link to view the file at this commit.
+     */
+
+    function FileDiff(filePath, status, patch, lineCounts, prevFilename, link) {
+        _classCallCheck(this, FileDiff);
+
+        this.rawPatch = patch;
+        this.file = filePath;
+        this.prevFile = prevFilename;
+        this.status = status;
+        this.link = link;
+        lineCounts = lineCounts || {
+            additions: 0,
+            deletions: 0,
+            changes: 0
+        };
+        this.additions = lineCounts.additions;
+        this.deletions = lineCounts.deletions;
+        this.changes = lineCounts.changes;
+        if (["added", "modified", "renamed", "removed"].indexOf(status) === -1) {
+            throw new Error("Bad FileDiff status: " + status);
+        }
+        if (patch) {
+            this.patch = new Patch(patch);
+        }
     }
-    if (patch) {
-        this.patch = new Patch(patch);
-    }
-}
 
-FileDiff.prototype.getFileExtension = function () {
-    if (!this.file || this.file.indexOf(".") === -1) {
-        return null;
-    }
-    var segments = this.file.split(".");
-    return segments[segments.length - 1];
-};
+    _createClass(FileDiff, [{
+        key: "getFileExtension",
+        value: function getFileExtension() {
+            if (!this.file || this.file.indexOf(".") === -1) {
+                return null;
+            }
+            var segments = this.file.split(".");
+            return segments[segments.length - 1];
+        }
+    }, {
+        key: "getLink",
+        value: function getLink() {
+            return this.link;
+        }
+    }, {
+        key: "getPrevFilePath",
+        value: function getPrevFilePath() {
+            return this.prevFile;
+        }
+    }, {
+        key: "getFilePath",
+        value: function getFilePath() {
+            return this.file;
+        }
+    }, {
+        key: "getAddCount",
+        value: function getAddCount() {
+            return this.additions;
+        }
+    }, {
+        key: "getRemoveCount",
+        value: function getRemoveCount() {
+            return this.deletions;
+        }
+    }, {
+        key: "getChangeCount",
+        value: function getChangeCount() {
+            return this.changes;
+        }
+    }, {
+        key: "getStatus",
+        value: function getStatus() {
+            return this.status;
+        }
+    }, {
+        key: "getFilePathString",
+        value: function getFilePathString() {
+            var prevFile = this.getPrevFilePath();
+            if (prevFile) {
+                return prevFile + " → " + this.getFilePath();
+            }
+            return this.getFilePath();
+        }
+    }, {
+        key: "getStatusString",
+        value: function getStatusString() {
+            // e.g. renamed => Renamed
+            return this.status[0].toUpperCase() + this.status.slice(1);
+        }
+    }, {
+        key: "getPatch",
+        value: function getPatch() {
+            return this.patch;
+        }
+    }, {
+        key: "getRawPatch",
+        value: function getRawPatch() {
+            return this.rawPatch;
+        }
+    }]);
 
-FileDiff.prototype.getLink = function () {
-    return this.link;
-};
-
-FileDiff.prototype.getPrevFilePath = function () {
-    return this.prevFile;
-};
-
-FileDiff.prototype.getFilePath = function () {
-    return this.file;
-};
-
-FileDiff.prototype.getAddCount = function () {
-    return this.additions;
-};
-
-FileDiff.prototype.getRemoveCount = function () {
-    return this.deletions;
-};
-
-FileDiff.prototype.getChangeCount = function () {
-    return this.changes;
-};
-
-FileDiff.prototype.getStatus = function () {
-    return this.status;
-};
-
-FileDiff.prototype.getFilePathString = function () {
-    if (this.getPrevFilePath()) {
-        return this.getPrevFilePath() + " → " + this.getFilePath();
-    }
-    return this.getFilePath();
-};
-
-FileDiff.prototype.getStatusString = function () {
-    // e.g. renamed => Renamed
-    return this.status[0].toUpperCase() + this.status.slice(1);
-};
-
-FileDiff.prototype.getPatch = function () {
-    return this.patch;
-};
-
-FileDiff.prototype.getRawPatch = function () {
-    return this.rawPatch;
-};
-
-FileDiff.STATUS = {
-    ADDED: "added",
-    RENAMED: "renamed",
-    MODIFIED: "modified",
-    REMOVED: "removed"
-};
-FileDiff.STATUSES = Object.keys(FileDiff.STATUS).map(function (k) {
-    return FileDiff.STATUS[k];
-});
+    return FileDiff;
+})();
 
 module.exports = FileDiff;
-},{"./patch":26}],24:[function(require,module,exports){
+},{"./patch":25}],23:[function(require,module,exports){
 "use strict";
 
-function LineComment(path, comment, pos, sha, patch) {
-    this.path = path;
-    this.comment = comment;
-    this.sha = sha;
-    this.patch = patch;
-    this.position = pos;
-}
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-LineComment.prototype.matches = function (lineComment) {
-    return this.path === lineComment.path && this.sha === lineComment.sha && this.position === lineComment.position;
-};
+var _comment = require("./comment");
 
-LineComment.prototype.getPatch = function () {
-    return this.patch;
-};
+var _comment2 = _interopRequireDefault(_comment);
 
-LineComment.prototype.isOnLine = function (line, isLineUnified) {
-    var lineInPatch = this.patch.getLastLine(); // this.patch.getUnifiedData()[this.position];
-    if (!lineInPatch) {
-        return false;
+var _patch = require("./patch");
+
+var _patch2 = _interopRequireDefault(_patch);
+
+var _line = require("./line");
+
+var _line2 = _interopRequireDefault(_line);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var LineComment = (function () {
+    function LineComment(path, comment, pos, sha, patch) {
+        _classCallCheck(this, LineComment);
+
+        this.path = path;
+        this.comment = comment;
+        this.sha = sha;
+        this.patch = patch;
+        this.position = pos;
     }
-    if (isLineUnified) {
-        return lineInPatch.getOldFileLineNum() === line.getOldFileLineNum() && lineInPatch.getNewFileLineNum() === line.getNewFileLineNum();
-    } else if (line.getOldFileLineNum()) {
-        return lineInPatch.getOldFileLineNum() === line.getOldFileLineNum();
-    } else if (line.getNewFileLineNum()) {
-        return lineInPatch.getNewFileLineNum() === line.getNewFileLineNum();
-    }
-    return false;
-};
 
-LineComment.prototype.getSha = function () {
-    return this.sha;
-};
+    _createClass(LineComment, [{
+        key: "matches",
+        value: function matches(lineComment) {
+            return this.path === lineComment.path && this.sha === lineComment.sha && this.position === lineComment.position;
+        }
+    }, {
+        key: "getPatch",
+        value: function getPatch() {
+            return this.patch;
+        }
+    }, {
+        key: "isOnLine",
+        value: function isOnLine(line, isLineUnified) {
+            var lineInPatch = this.patch.getLastLine(); // this.patch.getUnifiedData()[this.position];
+            if (!lineInPatch) {
+                return false;
+            }
+            if (isLineUnified) {
+                return lineInPatch.getOldFileLineNum() === line.getOldFileLineNum() && lineInPatch.getNewFileLineNum() === line.getNewFileLineNum();
+            } else if (line.getOldFileLineNum()) {
+                return lineInPatch.getOldFileLineNum() === line.getOldFileLineNum();
+            } else if (line.getNewFileLineNum()) {
+                return lineInPatch.getNewFileLineNum() === line.getNewFileLineNum();
+            }
+            return false;
+        }
+    }, {
+        key: "getSha",
+        value: function getSha() {
+            return this.sha;
+        }
+    }, {
+        key: "getShortSha",
+        value: function getShortSha() {
+            return this.sha.substring(0, 7);
+        }
+    }, {
+        key: "getFilePath",
+        value: function getFilePath() {
+            return this.path;
+        }
+    }, {
+        key: "getComment",
+        value: function getComment() {
+            return this.comment;
+        }
+    }]);
 
-LineComment.prototype.getShortSha = function () {
-    return this.sha.substring(0, 7);
-};
-
-LineComment.prototype.getFilePath = function () {
-    return this.path;
-};
-
-LineComment.prototype.getComment = function () {
-    return this.comment;
-};
+    return LineComment;
+})();
 
 module.exports = LineComment;
-},{}],25:[function(require,module,exports){
+},{"./comment":20,"./line":24,"./patch":25}],24:[function(require,module,exports){
 "use strict";
 
-function Line(type, raw) {
-    this.type = type;
-    this.raw = raw;
-    this.from = -1;
-    this.to = -1;
-    this._oldFileNum = undefined;
-    this._newFileNum = undefined;
-    if (Line.TYPES.indexOf(type) === -1) {
-        throw new Error("Bad Line type '" + type + "' on line " + raw);
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Line = (function () {
+    function Line(type, raw) {
+        _classCallCheck(this, Line);
+
+        this.type = type;
+        this.raw = raw;
+        this.from = -1;
+        this.to = -1;
+        this._oldFileNum = undefined;
+        this._newFileNum = undefined;
+        if (Line.TYPES.indexOf(type) === -1) {
+            throw new Error("Bad Line type '" + type + "' on line " + raw);
+        }
     }
-}
 
-Line.prototype.matches = function (line) {
-    if (!line) {
-        return false;
-    }
-    return this.raw === line.raw && this._oldFileNum === line._oldFileNum && this._newFileNum == line._newFileNum;
-};
+    _createClass(Line, [{
+        key: "matches",
+        value: function matches(line) {
+            if (!line) {
+                return false;
+            }
+            return this.raw === line.raw && this._oldFileNum === line._oldFileNum && this._newFileNum == line._newFileNum;
+        }
+    }, {
+        key: "setOldFileLineNum",
+        value: function setOldFileLineNum(num) {
+            this._oldFileNum = num;
+        }
+    }, {
+        key: "setNewFileLineNum",
+        value: function setNewFileLineNum(num) {
+            this._newFileNum = num;
+        }
+    }, {
+        key: "setFromChar",
+        value: function setFromChar(num) {
+            this.from = num;
+        }
+    }, {
+        key: "setToChar",
+        value: function setToChar(num) {
+            this.to = num;
+        }
+    }, {
+        key: "setHighlightRange",
+        value: function setHighlightRange(from, to) {
+            if (from < 0 || to > this.raw.length) {
+                // highlighted section can be EOL hence > and not >=
+                throw new Error("setHighlightRange(" + from + "," + to + ") out of bounds on raw string of " + "length " + this.raw.length + ": " + this.raw);
+            }
+            this.from = from;
+            this.to = to;
+        }
 
-Line.prototype.setOldFileLineNum = function (num) {
-    this._oldFileNum = num;
-};
+        /**
+         * @return {String[]} corresponding to [pre-highlight, highlighted section, post-highlight]
+         */
 
-Line.prototype.setNewFileLineNum = function (num) {
-    this._newFileNum = num;
-};
+    }, {
+        key: "getHighlightedSections",
+        value: function getHighlightedSections() {
+            return [this.raw.slice(0, this.from), this.raw.slice(this.from, this.to), this.raw.slice(this.to)];
+        }
+    }, {
+        key: "hasHighlightedSection",
+        value: function hasHighlightedSection() {
+            return this.from >= 0 && this.to >= 0;
+        }
+    }, {
+        key: "getOldFileLineNum",
+        value: function getOldFileLineNum() {
+            return this._oldFileNum;
+        }
+    }, {
+        key: "getNewFileLineNum",
+        value: function getNewFileLineNum() {
+            return this._newFileNum;
+        }
+    }, {
+        key: "getRawLine",
+        value: function getRawLine() {
+            return this.raw;
+        }
+    }, {
+        key: "getType",
+        value: function getType() {
+            return this.type;
+        }
+    }]);
 
-Line.prototype.setFromChar = function (num) {
-    this.from = num;
-};
-
-Line.prototype.setToChar = function (num) {
-    this.to = num;
-};
-
-Line.prototype.setHighlightRange = function (from, to) {
-    if (from < 0 || to > this.raw.length) {
-        // highlighted section can be EOL hence > and not >=
-        throw new Error("setHighlightRange(" + from + "," + to + ") out of bounds on raw string of " + "length " + this.raw.length + ": " + this.raw);
-    }
-    this.from = from;
-    this.to = to;
-};
-
-/**
- * @return {String[]} corresponding to [pre-highlight, highlighted section, post-highlight]
- */
-Line.prototype.getHighlightedSections = function () {
-    return [this.raw.slice(0, this.from), this.raw.slice(this.from, this.to), this.raw.slice(this.to)];
-};
-
-Line.prototype.hasHighlightedSection = function () {
-    return this.from >= 0 && this.to >= 0;
-};
-
-Line.prototype.getOldFileLineNum = function () {
-    return this._oldFileNum;
-};
-
-Line.prototype.getNewFileLineNum = function () {
-    return this._newFileNum;
-};
-
-Line.prototype.getRawLine = function () {
-    return this.raw;
-};
-
-Line.prototype.getType = function () {
-    return this.type;
-};
+    return Line;
+})();
 
 Line.TYPE_ADD = "add"; // Line has been added (green background)
 Line.TYPE_DEL = "del"; // Line has been removed (red background)
@@ -2600,616 +2606,777 @@ Line.TYPE_BLANK = "blank"; // Line has no text and isn't part of the
 Line.TYPES = [Line.TYPE_BLANK, Line.TYPE_HUNK, Line.TYPE_NOP, Line.TYPE_DEL, Line.TYPE_ADD];
 
 module.exports = Line;
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 
-var Line = require("./line");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function Patch(patchStr) {
-    this.raw = patchStr; // unified diffs
-    var lineData = Patch.calculateLineData(this.raw);
-    this.unified = lineData;
-    this.sideBySide = Patch.calculateSideBySide(lineData);
-}
+var _line = require("./line");
 
-Patch.prototype.getUnifiedData = function () {
-    return this.unified;
-};
+var _line2 = _interopRequireDefault(_line);
 
-Patch.prototype.getSideBySideData = function () {
-    return this.sideBySide;
-};
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-Patch.prototype.getRaw = function () {
-    return this.raw;
-};
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-Patch.prototype.setMaxLines = function (num) {
-    if (this.unified.length > num) {
-        this.unified = this.unified.splice(num * -1);
+var PatternMatcher = (function () {
+    function PatternMatcher() {
+        _classCallCheck(this, PatternMatcher);
+
+        this.items = [];
     }
-    if (this.sideBySide.old.length > num) {
-        this.sideBySide.old = this.sideBySide.old.splice(num * -1);
-        this.sideBySide.new = this.sideBySide.new.splice(num * -1);
-    }
-};
 
-Patch.prototype.getLinePosition = function (line) {
-    for (var i = 0; i < this.unified.length; i++) {
-        if (line.matches(this.unified[i])) {
-            return i;
+    _createClass(PatternMatcher, [{
+        key: "accumulate",
+        value: function accumulate(entity, data) {
+            this.items.push({
+                entity: entity,
+                data: data
+            });
         }
-    }
-    return -1;
-};
-
-Patch.prototype.getLastLine = function () {
-    return this.unified[this.unified.length - 1];
-};
-
-/**
- * @static
- * Convert a raw patch file into an array of objects (one per line) containing
- * parsed information for that line.
- * @return {Line[]}
- */
-Patch.calculateLineData = function (raw) {
-    // @@ -1,6 +1,7 @@
-    // @@ from,#lines from,#lines
-    var types = {
-        "+": Line.TYPE_ADD,
-        "-": Line.TYPE_DEL,
-        " ": Line.TYPE_NOP,
-        "@": Line.TYPE_HUNK,
-        "\\": Line.TYPE_NOP
-    };
-
-    var currentHunk = null;
-    var lineList = raw.split("\n").map(function (line) {
-        var lineType = types[line[0]];
-        var lineObj = new Line(lineType, line);
-
-        if (lineType === Line.TYPE_HUNK) {
-            var hunkData = /^@@ -(\d+),\d+ \+(\d+),\d+ @@.*/.exec(line);
-            if (!hunkData) {
-                hunkData = /^@@ -(\d+),\d+ \+(\d+) @@.*/.exec(line);
+    }, {
+        key: "getReverseItem",
+        value: function getReverseItem(index) {
+            var item = this.items[this.items.length - (1 + index)];
+            if (item) {
+                return item.data;
             }
-            if (!hunkData) {
-                hunkData = /^@@ -(\d+) \+(\d+),\d+ @@.*/.exec(line);
-            }
-            currentHunk = {
-                oldLineNo: parseInt(hunkData[1]),
-                newLineNo: parseInt(hunkData[2]),
-                oldLineCount: 0,
-                newLineCount: 0
-            };
-            return lineObj;
+            return null;
         }
+    }, {
+        key: "hasMatch",
+        value: function hasMatch() {
+            // hard-coded for now but could be factored out if we need PatternMatcher
+            // elsewhere.
+            var reversePattern = ["^" + _line2.default.TYPE_ADD, _line2.default.TYPE_ADD, _line2.default.TYPE_DEL, "^" + _line2.default.TYPE_DEL];
 
-        if (currentHunk === null) {
-            throw new Exception("Expected patch to start with a hunk like @@ -1,2 +3,4 @@");
-        }
-        // Algorithm:
-        // DEL always line increments the old file only (you can't remove from
-        //     the new file!)
-        // ADD always line increments the new file only (you can't add to the
-        //     old file else it'll be a NOP!)
-        // NOP always line increments both files
-        if (lineType === Line.TYPE_ADD) {
-            lineObj.setNewFileLineNum(currentHunk.newLineNo + currentHunk.newLineCount);
-            currentHunk.newLineCount += 1;
-        } else if (lineType === Line.TYPE_DEL) {
-            lineObj.setOldFileLineNum(currentHunk.oldLineNo + currentHunk.oldLineCount);
-            currentHunk.oldLineCount += 1;
-        } else if (lineType === Line.TYPE_NOP) {
-            lineObj.setOldFileLineNum(currentHunk.oldLineNo + currentHunk.oldLineCount);
-            lineObj.setNewFileLineNum(currentHunk.newLineNo + currentHunk.newLineCount);
-            currentHunk.oldLineCount += 1;
-            currentHunk.newLineCount += 1;
-        }
-        return lineObj;
-    });
+            // loop backwards for efficiency.
+            var counter = 0;
+            for (var i = this.items.length - 1; i >= 0; i--) {
+                var itemToMatch = reversePattern[counter].replace(/\^/g, "");
+                var isItemNegated = reversePattern[counter][0] === "^";
 
-    // ======== Single line contextual diffs ========
-    // rescan the patch looking for oppertunities to do contextual highlighting
-    // of certain characters. This happens when you have the following pattern
-    // of line types:
-    //    anything but DEL,
-    //    DEL,
-    //    ADD,
-    //    anything but ADD
-    // We can then just do a basic char by char diff on those 2 lines to highlight.
-    var patternMatcher = new PatternMatcher();
+                var negationMatch = isItemNegated && this.items[i].entity !== itemToMatch;
+                var normalMatch = !isItemNegated && this.items[i].entity === itemToMatch;
 
-    // add dummy line to aid matching (beginning of file needs to be matchable)
-    patternMatcher.accumulate("anything", {});
-
-    function checkMatch(line) {
-        patternMatcher.accumulate(line.type, line);
-        if (patternMatcher.hasMatch()) {
-            var delLineObj = patternMatcher.getReverseItem(2);
-            var addLineObj = patternMatcher.getReverseItem(1);
-
-            // do char diffs (find largest prefix/suffix matches and highlight the rest)
-            // we substring 1 here because the first char is either + or -
-            var dLine = delLineObj.getRawLine().substring(1);
-            var aLine = addLineObj.getRawLine().substring(1);
-            var maxLen = Math.max(dLine.length, aLine.length);
-            var charNum;
-            var prefixLength = 0;
-            var suffixLength = 0;
-            // find the largest prefix first
-            for (charNum = 0; charNum < maxLen; charNum++) {
-                if (aLine[charNum] !== dLine[charNum]) {
-                    prefixLength = charNum;
-                    break;
-                }
-            }
-
-            // now find the largest suffix
-            for (charNum = 0; charNum < maxLen; charNum++) {
-                var dSuffixIndex = dLine.length - charNum - 1;
-                var aSuffixIndex = aLine.length - charNum - 1;
-                // we must make sure that the prefix/suffix pointers don't cross else we'll
-                // duplicate the overlapped chars in the final output. E.g.
-                // DEL: 'python', 'build.py',
-                // ADD: 'python', 'build.py', "-v",
-                // Would naively produce:
-                // PREFIX: 'python', 'build.py',
-                // SUFFIX: ,
-                // But we've counted that end comma twice in the DEL string! We fix this by adding
-                // an extra termination rule for overlaps.
-                if (dSuffixIndex <= prefixLength - 1 || aSuffixIndex <= prefixLength - 1) {
-                    suffixLength = charNum;
-
-                    break;
-                }
-                // this is the same as the prefix match but in reverse
-                if (dSuffixIndex >= 0 && aSuffixIndex >= 0) {
-                    if (aLine[aSuffixIndex] !== dLine[dSuffixIndex]) {
-                        suffixLength = charNum;
-                        break;
+                if (negationMatch || normalMatch) {
+                    counter += 1;
+                    if (counter === reversePattern.length) {
+                        // reached the end of the pattern
+                        return true;
                     }
+                } else {
+                    // don't bother going further (this works because we rely on the
+                    // caller to invoke hasMatch each time something is accumulated)
+                    return false;
                 }
             }
-
-            // add one to prefixLength to accomodate for that starting + or -
-            delLineObj.setHighlightRange(prefixLength + 1, delLineObj.getRawLine().length - suffixLength);
-            addLineObj.setHighlightRange(prefixLength + 1, addLineObj.getRawLine().length - suffixLength);
-        }
-    }
-
-    lineList.forEach(checkMatch);
-
-    // add dummy line to aid matching (EOF needs to be matchable)
-    checkMatch({ type: "anything" });
-
-    return lineList;
-};
-
-/**
- * @static
- * Calculate the side by side rows for each table from unified line data.
- * @return {Object} With 'old' and 'new' keys which have Line[] values.
- */
-Patch.calculateSideBySide = function (data) {
-    // Diffs can be split into "only additions", "only deletions" and "both add/del".
-    // For only additions => old file has blank line, new file has addition
-    // For only deletions => old file has deletion, new file has blank line
-    // For both => both sections start on the same line (del=left, add=right),
-    //             mismatched lengths are inserted with blank lines.
-    //
-    // The "both" use case is tricky because we can't do a single sweep to insert
-    // rows (deletions happen first so it'll be treated as "only deletions" until
-    // it sees the "additions" block!). The algorithm we use "looks ahead" on
-    // deletion blocks to see if it is really a "both" block and acts accordingly.
-    var oldFile = [];
-    var newFile = [];
-
-    var inBothBlock = false;
-    var bothBlockAdditionOffset = -1;
-    var bothBlockEndLineNum = -1;
-    // Example Both Block:
-    //    no change
-    //  - first line              no change    |   no change
-    //  - second line           - first line   | + 1st line
-    //  + 1st line       ===>   - second line  | + 2nd line
-    //  + 2nd line                [ blank ]    | + 3rd line
-    //  + 3rd line
-    // bothBlockEndLineNum = 6
-    // bothBlockAdditionOffset = 2 (jump 2 forward to get the addition line)
-    var prevLineType = null;
-    for (var lineNum = 0; lineNum < data.length; lineNum++) {
-        var line = data[lineNum];
-
-        // check if we should start being in a both block
-        if (!inBothBlock && prevLineType === Line.TYPE_NOP && line.getType() === Line.TYPE_DEL) {
-            bothBlockEndLineNum = -1;
-            // look ahead - we may transition into a both block
-            var seenAddition = false;
-            for (var i = lineNum + 1; i < data.length; i++) {
-                var nextLine = data[i];
-                // a both block has to be a contiguous section of dels/adds
-                if (nextLine.getType() !== Line.TYPE_DEL && nextLine.getType() !== Line.TYPE_ADD) {
-                    bothBlockEndLineNum = i;
-                    break;
-                }
-                // we MUST see an add for this to be a both block (vs just del)
-                if (!seenAddition && nextLine.getType() === Line.TYPE_ADD) {
-                    bothBlockAdditionOffset = i - lineNum;
-                    seenAddition = true;
-                }
-            }
-
-            if (seenAddition) {
-                if (bothBlockEndLineNum === -1) {
-                    // the both block ends at EOF
-                    bothBlockEndLineNum = data.length;
-                }
-                inBothBlock = true;
-            }
-        }
-        // check if we should stop being in a both block
-        else if (inBothBlock && line.getType() !== Line.TYPE_ADD && line.getType() !== Line.TYPE_DEL) {
-                inBothBlock = false;
-            }
-
-        if (inBothBlock) {
-            // dels come first in a del block
-            var delLine = line.getType() === Line.TYPE_DEL ? line : new Line(Line.TYPE_BLANK, " ");
-            // adds come 2nd, so we need to add the offset
-            var addLine = data[lineNum + bothBlockAdditionOffset];
-            // it's possible that 'addLine' is beyond the bounds of the both block
-            if (!addLine || lineNum + bothBlockAdditionOffset >= bothBlockEndLineNum) {
-                addLine = new Line(Line.TYPE_BLANK, " ");
-            }
-            // unified diffs are longer than side-by-sides, so we can't just add
-            // lines for each loop we do. They condense in the both block when
-            // there is nothing to add to both tables, so check that here.
-            if (delLine.getType() === Line.TYPE_BLANK && addLine.getType() === Line.TYPE_BLANK) {
-                continue;
-            }
-            oldFile.push(delLine);
-            newFile.push(addLine);
-        } else {
-            switch (line.getType()) {
-                case Line.TYPE_ADD:
-                    oldFile.push(new Line(Line.TYPE_BLANK, " "));
-                    newFile.push(line);
-                    break;
-                case Line.TYPE_DEL:
-                    oldFile.push(line);
-                    newFile.push(new Line(Line.TYPE_BLANK, " "));
-                    break;
-                case Line.TYPE_NOP:
-                case Line.TYPE_HUNK:
-                    oldFile.push(line);
-                    newFile.push(line);
-                    break;
-                default:
-                    break;
-            }
-        }
-        prevLineType = line.getType();
-    }
-
-    return {
-        "old": oldFile,
-        "new": newFile
-    };
-};
-
-function PatternMatcher() {
-    this.items = [];
-}
-
-PatternMatcher.prototype.accumulate = function (entity, data) {
-    this.items.push({
-        entity: entity,
-        data: data
-    });
-};
-
-PatternMatcher.prototype.getReverseItem = function (index) {
-    var item = this.items[this.items.length - (1 + index)];
-    if (item) {
-        return item.data;
-    }
-    return null;
-};
-
-PatternMatcher.prototype.hasMatch = function () {
-    // hard-coded for now but could be factored out if we need PatternMatcher
-    // elsewhere.
-    var reversePattern = ["^" + Line.TYPE_ADD, Line.TYPE_ADD, Line.TYPE_DEL, "^" + Line.TYPE_DEL];
-
-    // loop backwards for efficiency.
-    var counter = 0;
-    for (var i = this.items.length - 1; i >= 0; i--) {
-        var itemToMatch = reversePattern[counter].replace(/\^/g, "");
-        var isItemNegated = reversePattern[counter][0] === "^";
-
-        var negationMatch = isItemNegated && this.items[i].entity !== itemToMatch;
-        var normalMatch = !isItemNegated && this.items[i].entity === itemToMatch;
-
-        if (negationMatch || normalMatch) {
-            counter += 1;
-            if (counter === reversePattern.length) {
-                // reached the end of the pattern
-                return true;
-            }
-        } else {
-            // don't bother going further (this works because we rely on the
-            // caller to invoke hasMatch each time something is accumulated)
             return false;
         }
+    }]);
+
+    return PatternMatcher;
+})();
+
+var Patch = (function () {
+    function Patch(patchStr) {
+        _classCallCheck(this, Patch);
+
+        this.raw = patchStr; // unified diffs
+        var lineData = Patch.calculateLineData(this.raw);
+        this.unified = lineData;
+        this.sideBySide = Patch.calculateSideBySide(lineData);
     }
-    return false;
-};
+
+    _createClass(Patch, [{
+        key: "getUnifiedData",
+        value: function getUnifiedData() {
+            return this.unified;
+        }
+    }, {
+        key: "getSideBySideData",
+        value: function getSideBySideData() {
+            return this.sideBySide;
+        }
+    }, {
+        key: "getRaw",
+        value: function getRaw() {
+            return this.raw;
+        }
+    }, {
+        key: "setMaxLines",
+        value: function setMaxLines(num) {
+            if (this.unified.length > num) {
+                this.unified = this.unified.splice(num * -1);
+            }
+            if (this.sideBySide.old.length > num) {
+                this.sideBySide.old = this.sideBySide.old.splice(num * -1);
+                this.sideBySide.new = this.sideBySide.new.splice(num * -1);
+            }
+        }
+    }, {
+        key: "getLinePosition",
+        value: function getLinePosition(line) {
+            for (var i = 0; i < this.unified.length; i++) {
+                if (line.matches(this.unified[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+    }, {
+        key: "getLastLine",
+        value: function getLastLine() {
+            return this.unified[this.unified.length - 1];
+        }
+
+        /**
+         * @static
+         * Calculate the side by side rows for each table from unified line data.
+         * @return {Object} With 'old' and 'new' keys which have Line[] values.
+         */
+
+    }], [{
+        key: "calculateSideBySide",
+        value: function calculateSideBySide(data) {
+            // Diffs can be split into "only additions", "only deletions" and "both add/del".
+            // For only additions => old file has blank line, new file has addition
+            // For only deletions => old file has deletion, new file has blank line
+            // For both => both sections start on the same line (del=left, add=right),
+            //             mismatched lengths are inserted with blank lines.
+            //
+            // The "both" use case is tricky because we can't do a single sweep to insert
+            // rows (deletions happen first so it'll be treated as "only deletions" until
+            // it sees the "additions" block!). The algorithm we use "looks ahead" on
+            // deletion blocks to see if it is really a "both" block and acts accordingly.
+            var oldFile = [];
+            var newFile = [];
+
+            var inBothBlock = false;
+            var bothBlockAdditionOffset = -1;
+            var bothBlockEndLineNum = -1;
+            // Example Both Block:
+            //    no change
+            //  - first line              no change    |   no change
+            //  - second line           - first line   | + 1st line
+            //  + 1st line       ===>   - second line  | + 2nd line
+            //  + 2nd line                [ blank ]    | + 3rd line
+            //  + 3rd line
+            // bothBlockEndLineNum = 6
+            // bothBlockAdditionOffset = 2 (jump 2 forward to get the addition line)
+            var prevLineType = null;
+            for (var lineNum = 0; lineNum < data.length; lineNum++) {
+                var line = data[lineNum];
+
+                // check if we should start being in a both block
+                if (!inBothBlock && prevLineType === _line2.default.TYPE_NOP && line.getType() === _line2.default.TYPE_DEL) {
+                    bothBlockEndLineNum = -1;
+                    // look ahead - we may transition into a both block
+                    var seenAddition = false;
+                    for (var i = lineNum + 1; i < data.length; i++) {
+                        var nextLine = data[i];
+                        // a both block has to be a contiguous section of dels/adds
+                        if (nextLine.getType() !== _line2.default.TYPE_DEL && nextLine.getType() !== _line2.default.TYPE_ADD) {
+                            bothBlockEndLineNum = i;
+                            break;
+                        }
+                        // we MUST see an add for this to be a both block (vs just del)
+                        if (!seenAddition && nextLine.getType() === _line2.default.TYPE_ADD) {
+                            bothBlockAdditionOffset = i - lineNum;
+                            seenAddition = true;
+                        }
+                    }
+
+                    if (seenAddition) {
+                        if (bothBlockEndLineNum === -1) {
+                            // the both block ends at EOF
+                            bothBlockEndLineNum = data.length;
+                        }
+                        inBothBlock = true;
+                    }
+                }
+                // check if we should stop being in a both block
+                else if (inBothBlock && line.getType() !== _line2.default.TYPE_ADD && line.getType() !== _line2.default.TYPE_DEL) {
+                        inBothBlock = false;
+                    }
+
+                if (inBothBlock) {
+                    // dels come first in a del block
+                    var delLine = line.getType() === _line2.default.TYPE_DEL ? line : new _line2.default(_line2.default.TYPE_BLANK, " ");
+                    // adds come 2nd, so we need to add the offset
+                    var addLine = data[lineNum + bothBlockAdditionOffset];
+                    // it's possible that 'addLine' is beyond the bounds of the both block
+                    if (!addLine || lineNum + bothBlockAdditionOffset >= bothBlockEndLineNum) {
+                        addLine = new _line2.default(_line2.default.TYPE_BLANK, " ");
+                    }
+                    // unified diffs are longer than side-by-sides, so we can't just add
+                    // lines for each loop we do. They condense in the both block when
+                    // there is nothing to add to both tables, so check that here.
+                    if (delLine.getType() === _line2.default.TYPE_BLANK && addLine.getType() === _line2.default.TYPE_BLANK) {
+                        continue;
+                    }
+                    oldFile.push(delLine);
+                    newFile.push(addLine);
+                } else {
+                    switch (line.getType()) {
+                        case _line2.default.TYPE_ADD:
+                            oldFile.push(new _line2.default(_line2.default.TYPE_BLANK, " "));
+                            newFile.push(line);
+                            break;
+                        case _line2.default.TYPE_DEL:
+                            oldFile.push(line);
+                            newFile.push(new _line2.default(_line2.default.TYPE_BLANK, " "));
+                            break;
+                        case _line2.default.TYPE_NOP:
+                        case _line2.default.TYPE_HUNK:
+                            oldFile.push(line);
+                            newFile.push(line);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                prevLineType = line.getType();
+            }
+
+            return {
+                "old": oldFile,
+                "new": newFile
+            };
+        }
+
+        /**
+         * @static
+         * Convert a raw patch file into an array of objects (one per line) containing
+         * parsed information for that line.
+         * @return {Line[]}
+         */
+
+    }, {
+        key: "calculateLineData",
+        value: function calculateLineData(raw) {
+            // @@ -1,6 +1,7 @@
+            // @@ from,#lines from,#lines
+            var types = {
+                "+": _line2.default.TYPE_ADD,
+                "-": _line2.default.TYPE_DEL,
+                " ": _line2.default.TYPE_NOP,
+                "@": _line2.default.TYPE_HUNK,
+                "\\": _line2.default.TYPE_NOP
+            };
+
+            var currentHunk = null;
+            var lineList = raw.split("\n").map(function (line) {
+                var lineType = types[line[0]];
+                var lineObj = new _line2.default(lineType, line);
+
+                if (lineType === _line2.default.TYPE_HUNK) {
+                    var hunkData = /^@@ -(\d+),\d+ \+(\d+),\d+ @@.*/.exec(line);
+                    if (!hunkData) {
+                        hunkData = /^@@ -(\d+),\d+ \+(\d+) @@.*/.exec(line);
+                    }
+                    if (!hunkData) {
+                        hunkData = /^@@ -(\d+) \+(\d+),\d+ @@.*/.exec(line);
+                    }
+                    currentHunk = {
+                        oldLineNo: parseInt(hunkData[1]),
+                        newLineNo: parseInt(hunkData[2]),
+                        oldLineCount: 0,
+                        newLineCount: 0
+                    };
+                    return lineObj;
+                }
+
+                if (currentHunk === null) {
+                    throw new Error("Expected patch to start with a hunk like @@ -1,2 +3,4 @@");
+                }
+                // Algorithm:
+                // DEL always line increments the old file only (you can't remove from
+                //     the new file!)
+                // ADD always line increments the new file only (you can't add to the
+                //     old file else it'll be a NOP!)
+                // NOP always line increments both files
+                if (lineType === _line2.default.TYPE_ADD) {
+                    lineObj.setNewFileLineNum(currentHunk.newLineNo + currentHunk.newLineCount);
+                    currentHunk.newLineCount += 1;
+                } else if (lineType === _line2.default.TYPE_DEL) {
+                    lineObj.setOldFileLineNum(currentHunk.oldLineNo + currentHunk.oldLineCount);
+                    currentHunk.oldLineCount += 1;
+                } else if (lineType === _line2.default.TYPE_NOP) {
+                    lineObj.setOldFileLineNum(currentHunk.oldLineNo + currentHunk.oldLineCount);
+                    lineObj.setNewFileLineNum(currentHunk.newLineNo + currentHunk.newLineCount);
+                    currentHunk.oldLineCount += 1;
+                    currentHunk.newLineCount += 1;
+                }
+                return lineObj;
+            });
+
+            // ======== Single line contextual diffs ========
+            // rescan the patch looking for oppertunities to do contextual highlighting
+            // of certain characters. This happens when you have the following pattern
+            // of line types:
+            //    anything but DEL,
+            //    DEL,
+            //    ADD,
+            //    anything but ADD
+            // We can then just do a basic char by char diff on those 2 lines to highlight.
+            var patternMatcher = new PatternMatcher();
+
+            // add dummy line to aid matching (beginning of file needs to be matchable)
+            patternMatcher.accumulate("anything", {});
+
+            function checkMatch(line) {
+                patternMatcher.accumulate(line.type, line);
+                if (patternMatcher.hasMatch()) {
+                    var delLineObj = patternMatcher.getReverseItem(2);
+                    var addLineObj = patternMatcher.getReverseItem(1);
+                    if (!delLineObj || !addLineObj) {
+                        return;
+                    }
+
+                    // do char diffs (find largest prefix/suffix matches and highlight the rest)
+                    // we substring 1 here because the first char is either + or -
+                    var dLine = delLineObj.getRawLine().substring(1);
+                    var aLine = addLineObj.getRawLine().substring(1);
+                    var maxLen = Math.max(dLine.length, aLine.length);
+                    var charNum;
+                    var prefixLength = 0;
+                    var suffixLength = 0;
+                    // find the largest prefix first
+                    for (charNum = 0; charNum < maxLen; charNum++) {
+                        if (aLine[charNum] !== dLine[charNum]) {
+                            prefixLength = charNum;
+                            break;
+                        }
+                    }
+
+                    // now find the largest suffix
+                    for (charNum = 0; charNum < maxLen; charNum++) {
+                        var dSuffixIndex = dLine.length - charNum - 1;
+                        var aSuffixIndex = aLine.length - charNum - 1;
+                        // we must make sure that the prefix/suffix pointers don't cross else we'll
+                        // duplicate the overlapped chars in the final output. E.g.
+                        // DEL: 'python', 'build.py',
+                        // ADD: 'python', 'build.py', "-v",
+                        // Would naively produce:
+                        // PREFIX: 'python', 'build.py',
+                        // SUFFIX: ,
+                        // But we've counted that end comma twice in the DEL string! We fix this by
+                        // adding an extra termination rule for overlaps.
+                        if (dSuffixIndex <= prefixLength - 1 || aSuffixIndex <= prefixLength - 1) {
+                            suffixLength = charNum;
+                            break;
+                        }
+                        // this is the same as the prefix match but in reverse
+                        if (dSuffixIndex >= 0 && aSuffixIndex >= 0) {
+                            if (aLine[aSuffixIndex] !== dLine[dSuffixIndex]) {
+                                suffixLength = charNum;
+                                break;
+                            }
+                        }
+                    }
+
+                    // add one to prefixLength to accomodate for that starting + or -
+                    delLineObj.setHighlightRange(prefixLength + 1, delLineObj.getRawLine().length - suffixLength);
+                    addLineObj.setHighlightRange(prefixLength + 1, addLineObj.getRawLine().length - suffixLength);
+                }
+            }
+
+            lineList.forEach(checkMatch);
+
+            // add dummy line to aid matching (EOF needs to be matchable)
+            checkMatch({ type: "anything" });
+
+            return lineList;
+        }
+    }]);
+
+    return Patch;
+})();
 
 module.exports = Patch;
-},{"./line":25}],27:[function(require,module,exports){
+},{"./line":24}],26:[function(require,module,exports){
 "use strict";
 
-var Actions = require("../models/action");
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function PullRequest(repo, id) {
-    this.repo = repo;
-    this.id = id;
-    this.link = null;
-    this.title = null;
-    this.body = null;
-    this.state = null;
-    this.src = null;
-    this.dest = null;
-    this.owner = null;
-    this.assignee = null;
-    this.merger = null;
-    this.mergeable = null;
-    this.commits = [];
-    this.comments = [];
-    this.lineComments = [];
-}
+var _action = require("./action");
 
-PullRequest.prototype.setState = function (state) {
-    if (["merged", "open", "closed"].indexOf(state) === -1) {
-        throw new Error("setState: bad state => " + state);
+var _action2 = _interopRequireDefault(_action);
+
+var _comment = require("./comment");
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _commit = require("./commit");
+
+var _commit2 = _interopRequireDefault(_commit);
+
+var _lineComment = require("./line-comment");
+
+var _lineComment2 = _interopRequireDefault(_lineComment);
+
+var _ref = require("./ref");
+
+var _ref2 = _interopRequireDefault(_ref);
+
+var _user = require("./user");
+
+var _user2 = _interopRequireDefault(_user);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PullRequest = (function () {
+    function PullRequest(repo, id) {
+        _classCallCheck(this, PullRequest);
+
+        this.repo = repo;
+        this.id = id;
+        this.link = null;
+        this.title = null;
+        this.body = null;
+        this.state = null;
+        this.src = null;
+        this.dest = null;
+        this.owner = null;
+        this.assignee = null;
+        this.merger = null;
+        this.mergeable = false;
+        this.commits = [];
+        this.comments = [];
+        this.lineComments = [];
+        this.actions = [];
     }
-    this.state = state;
-};
 
-PullRequest.prototype.setLink = function (link) {
-    this.link = link;
-};
+    _createClass(PullRequest, [{
+        key: "setState",
+        value: function setState(state) {
+            if (["merged", "open", "closed"].indexOf(state) === -1) {
+                throw new Error("setState: bad state => " + state);
+            }
+            this.state = state;
+        }
+    }, {
+        key: "setLink",
+        value: function setLink(link) {
+            this.link = link;
+        }
+    }, {
+        key: "setTitle",
+        value: function setTitle(title) {
+            this.title = title;
+        }
+    }, {
+        key: "setBody",
+        value: function setBody(body) {
+            this.body = body;
+        }
+    }, {
+        key: "setSource",
+        value: function setSource(src) {
+            this.src = src;
+        }
+    }, {
+        key: "setDest",
+        value: function setDest(dest) {
+            this.dest = dest;
+        }
+    }, {
+        key: "setOwner",
+        value: function setOwner(user) {
+            this.owner = user;
+        }
+    }, {
+        key: "setAssignee",
+        value: function setAssignee(assignee) {
+            this.assignee = assignee;
+        }
+    }, {
+        key: "setMerger",
+        value: function setMerger(merger) {
+            this.merger = merger;
+        }
+    }, {
+        key: "setMergeable",
+        value: function setMergeable(mergeable) {
+            this.mergeable = mergeable;
+        }
+    }, {
+        key: "setLineComments",
+        value: function setLineComments(lineComments) {
+            this.lineComments = lineComments;
+            this.actions = _action2.default.fromLineComments(lineComments);
+        }
+    }, {
+        key: "getRepo",
+        value: function getRepo() {
+            return this.repo;
+        }
+    }, {
+        key: "getId",
+        value: function getId() {
+            return this.id;
+        }
+    }, {
+        key: "getTitle",
+        value: function getTitle() {
+            return this.title;
+        }
+    }, {
+        key: "getBody",
+        value: function getBody() {
+            return this.body;
+        }
+    }, {
+        key: "getLink",
+        value: function getLink() {
+            return this.link;
+        }
+    }, {
+        key: "getState",
+        value: function getState() {
+            return this.state;
+        }
+    }, {
+        key: "getPrettyState",
+        value: function getPrettyState() {
+            var state = this.state;
+            if (!state) {
+                return null;
+            }
+            return state[0].toUpperCase() + state.substring(1);
+        }
+    }, {
+        key: "getSource",
+        value: function getSource() {
+            return this.src;
+        }
+    }, {
+        key: "getDest",
+        value: function getDest() {
+            return this.dest;
+        }
+    }, {
+        key: "getOwner",
+        value: function getOwner() {
+            return this.owner;
+        }
+    }, {
+        key: "getAssignee",
+        value: function getAssignee() {
+            return this.assignee;
+        }
+    }, {
+        key: "getMerger",
+        value: function getMerger() {
+            return this.merger;
+        }
+    }, {
+        key: "getMergeable",
+        value: function getMergeable() {
+            return this.mergeable;
+        }
+    }, {
+        key: "getCommits",
+        value: function getCommits() {
+            return this.commits;
+        }
+    }, {
+        key: "getComments",
+        value: function getComments() {
+            return this.comments;
+        }
+    }, {
+        key: "setComments",
+        value: function setComments(comments) {
+            this.comments = comments;
+        }
+    }, {
+        key: "setCommits",
+        value: function setCommits(commits) {
+            this.commits = commits;
+        }
+    }, {
+        key: "getActions",
+        value: function getActions() {
+            return this.actions;
+        }
+    }, {
+        key: "getDoneActions",
+        value: function getDoneActions() {
+            return this.getActions().filter(function (a) {
+                return a.isDone();
+            });
+        }
+    }, {
+        key: "getActionsToDo",
+        value: function getActionsToDo() {
+            return this.getActions().filter(function (a) {
+                return !a.isDone();
+            });
+        }
+    }, {
+        key: "isLGTM",
+        value: function isLGTM() {
+            var lastComment = this.getLastComment();
+            if (!lastComment) {
+                return false;
+            }
+            return lastComment.getBody().indexOf("LGTM") >= 0;
+        }
+    }, {
+        key: "getLastComment",
+        value: function getLastComment() {
+            if (this.getComments().length === 0) {
+                return null;
+            }
+            return this.getComments()[this.getComments().length - 1];
+        }
+    }, {
+        key: "getLastCommenter",
+        value: function getLastCommenter() {
+            var lastComment = this.getLastComment();
+            if (!lastComment) {
+                return null;
+            }
+            return lastComment.getUser();
+        }
+    }, {
+        key: "getLineComments",
+        value: function getLineComments() {
+            return this.lineComments;
+        }
+    }]);
 
-PullRequest.prototype.setTitle = function (title) {
-    this.title = title;
-};
-
-PullRequest.prototype.setBody = function (body) {
-    this.body = body;
-};
-
-PullRequest.prototype.setSource = function (src) {
-    this.src = src;
-};
-
-PullRequest.prototype.setDest = function (dest) {
-    this.dest = dest;
-};
-
-PullRequest.prototype.setOwner = function (user) {
-    this.owner = user;
-};
-
-PullRequest.prototype.setAssignee = function (assignee) {
-    this.assignee = assignee;
-};
-
-PullRequest.prototype.setMerger = function (merger) {
-    this.merger = merger;
-};
-
-PullRequest.prototype.setMergeable = function (mergeable) {
-    this.mergeable = mergeable;
-};
-
-PullRequest.prototype.setLineComments = function (lineComments) {
-    this.lineComments = lineComments;
-    this.actions = Actions.fromLineComments(lineComments);
-};
-
-PullRequest.prototype.getRepo = function () {
-    return this.repo;
-};
-
-PullRequest.prototype.getId = function () {
-    return this.id;
-};
-
-PullRequest.prototype.getTitle = function () {
-    return this.title;
-};
-
-PullRequest.prototype.getBody = function () {
-    return this.body;
-};
-
-PullRequest.prototype.getLink = function () {
-    return this.link;
-};
-
-PullRequest.prototype.getState = function () {
-    return this.state;
-};
-
-PullRequest.prototype.getPrettyState = function () {
-    if (!this.state) {
-        return null;
-    }
-    return this.state[0].toUpperCase() + this.state.substring(1);
-};
-
-PullRequest.prototype.getSource = function () {
-    return this.src;
-};
-
-PullRequest.prototype.getDest = function () {
-    return this.dest;
-};
-
-PullRequest.prototype.getOwner = function () {
-    return this.owner;
-};
-
-PullRequest.prototype.getAssignee = function () {
-    return this.assignee;
-};
-
-PullRequest.prototype.getMerger = function () {
-    return this.merger;
-};
-
-PullRequest.prototype.getMergeable = function () {
-    return this.mergeable;
-};
-
-PullRequest.prototype.getCommits = function () {
-    return this.commits;
-};
-
-PullRequest.prototype.getComments = function () {
-    return this.comments;
-};
-
-PullRequest.prototype.setComments = function (comments) {
-    this.comments = comments;
-};
-
-PullRequest.prototype.setCommits = function (commits) {
-    this.commits = commits;
-};
-
-PullRequest.prototype.getActions = function () {
-    return this.actions;
-};
-
-PullRequest.prototype.getDoneActions = function () {
-    return this.getActions().filter(function (a) {
-        return a.isDone();
-    });
-};
-
-PullRequest.prototype.getActionsToDo = function () {
-    return this.getActions().filter(function (a) {
-        return !a.isDone();
-    });
-};
-
-PullRequest.prototype.isLGTM = function () {
-    var lastComment = this.getLastComment();
-    if (!lastComment) {
-        return false;
-    }
-    return lastComment.getBody().indexOf("LGTM") >= 0;
-};
-
-PullRequest.prototype.getLastComment = function () {
-    if (this.getComments().length === 0) {
-        return null;
-    }
-    return this.getComments()[this.getComments().length - 1];
-};
-
-PullRequest.prototype.getLastCommenter = function () {
-    var lastComment = this.getLastComment();
-    if (!lastComment) {
-        return null;
-    }
-    return lastComment.getUser();
-};
-
-PullRequest.prototype.getLineComments = function () {
-    return this.lineComments;
-};
+    return PullRequest;
+})();
 
 module.exports = PullRequest;
-},{"../models/action":20}],28:[function(require,module,exports){
+},{"./action":19,"./comment":20,"./commit":21,"./line-comment":23,"./ref":27,"./user":29}],27:[function(require,module,exports){
 "use strict";
 
-function Ref(repo, user, label, sha, ref) {
-    this.repo = repo;
-    this.user = user;
-    this.label = label;
-    this.sha = sha;
-    this.ref = ref;
-}
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-Ref.prototype.getRepo = function () {
-    return this.repo;
-};
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-Ref.prototype.getUser = function () {
-    return this.user;
-};
+var Ref = (function () {
+    function Ref(repo, user, label, sha, ref) {
+        _classCallCheck(this, Ref);
 
-Ref.prototype.getLabel = function () {
-    return this.label;
-};
+        this.repo = repo;
+        this.user = user;
+        this.label = label;
+        this.sha = sha;
+        this.ref = ref;
+    } // FIXME
 
-Ref.prototype.getSha = function () {
-    return this.sha;
-};
+    // instance prop types
 
-Ref.prototype.getRef = function () {
-    return this.ref;
-};
+    _createClass(Ref, [{
+        key: "getRepo",
+        value: function getRepo() {
+            return this.repo;
+        }
+    }, {
+        key: "getUser",
+        value: function getUser() {
+            return this.user;
+        }
+    }, {
+        key: "getLabel",
+        value: function getLabel() {
+            return this.label;
+        }
+    }, {
+        key: "getSha",
+        value: function getSha() {
+            return this.sha;
+        }
+    }, {
+        key: "getRef",
+        value: function getRef() {
+            return this.ref;
+        }
+    }]);
+
+    return Ref;
+})();
 
 module.exports = Ref;
+},{}],28:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Repo = (function () {
+    function Repo(cloneUrl) {
+        _classCallCheck(this, Repo);
+
+        this.cloneUrl = cloneUrl;
+    }
+
+    _createClass(Repo, [{
+        key: "getCloneUrl",
+        value: function getCloneUrl() {
+            return this.cloneUrl;
+        }
+    }]);
+
+    return Repo;
+})();
+
+module.exports = Repo;
 },{}],29:[function(require,module,exports){
 "use strict";
 
-function Repo(cloneUrl) {
-    this.cloneUrl = cloneUrl;
-}
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-Repo.prototype.getCloneUrl = function () {
-    return this.cloneUrl;
-};
-
-module.exports = Repo;
-},{}],30:[function(require,module,exports){
-"use strict";
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var React = require("react"); // eslint-disable-line
 
-function User(name, avatar, user_url) {
-    this.url = user_url;
-    this.name = name;
-    this.avatar = avatar;
-}
+var User = (function () {
+    function User(name, avatar, user_url) {
+        _classCallCheck(this, User);
 
-User.prototype.getAvatarUrl = function () {
-    return this.avatar;
-};
-
-User.prototype.getUserLinkJsx = function (key) {
-    return React.createElement(
-        "a",
-        { href: this.url, target: "_blank", key: key },
-        this.name
-    );
-};
-
-User.prototype.equals = function (other) {
-    if (!other) {
-        return false;
+        this.url = user_url;
+        this.name = name;
+        this.avatar = avatar;
     }
-    return this.name === other.name;
-};
+
+    _createClass(User, [{
+        key: "getAvatarUrl",
+        value: function getAvatarUrl() {
+            return this.avatar;
+        }
+    }, {
+        key: "getUserLinkJsx",
+        value: function getUserLinkJsx(key) {
+            return React.createElement(
+                "a",
+                { href: this.url, target: "_blank", key: key },
+                this.name
+            );
+        }
+    }, {
+        key: "equals",
+        value: function equals(other) {
+            if (!other) {
+                return false;
+            }
+            return this.name === other.name;
+        }
+    }]);
+
+    return User;
+})();
 
 module.exports = User;
-},{"react":585}],31:[function(require,module,exports){
+},{"react":585}],30:[function(require,module,exports){
 "use strict";
 
 var ID_ACCESS_TOKEN = "SessionStore_access_token";
@@ -3245,19 +3412,228 @@ SessionStore.prototype.setRequestId = function (reqId) {
 };
 
 module.exports = SessionStore;
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
+
+var _TRIGGERS;
+
+var _dispatcher = require("./dispatcher");
+
+var _dispatcher2 = _interopRequireDefault(_dispatcher);
+
+var _pullRequest = require("./models/pull-request");
+
+var _pullRequest2 = _interopRequireDefault(_pullRequest);
+
+var _fileDiff = require("./models/file-diff");
+
+var _fileDiff2 = _interopRequireDefault(_fileDiff);
+
+var _lineComment = require("./models/line-comment");
+
+var _lineComment2 = _interopRequireDefault(_lineComment);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// TODO:
+// - I wonder if we even needs ".name" for this. Would class comparisons be better/worse?
+// - I also wonder if we need FileDiff/LineComments triggers, why not just PullRequestTrigger again?
+//   Or should we be indicating updated keys somehow...
+// - MergeErrorTrigger feels wrong, I wonder if it should be merged into a MergeTrigger with an
+//   error field.
+// - Should these triggers be separate files?
+
+var Trigger = function Trigger(name) {
+    _classCallCheck(this, Trigger);
+
+    this.name = name;
+};
+
+Trigger.TYPE = "NOT IMPLEMENTED";
+
+var PullRequestTrigger = (function (_Trigger) {
+    _inherits(PullRequestTrigger, _Trigger);
+
+    function PullRequestTrigger(pr) {
+        _classCallCheck(this, PullRequestTrigger);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PullRequestTrigger).call(this, PullRequestTrigger.TYPE));
+
+        _this.pr = pr;
+        return _this;
+    }
+
+    return PullRequestTrigger;
+})(Trigger);
+
+PullRequestTrigger.TYPE = "pr_info";
+
+var FileDiffsTrigger = (function (_Trigger2) {
+    _inherits(FileDiffsTrigger, _Trigger2);
+
+    function FileDiffsTrigger(files) {
+        _classCallCheck(this, FileDiffsTrigger);
+
+        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(FileDiffsTrigger).call(this, FileDiffsTrigger.TYPE));
+
+        _this2.files = files;
+        return _this2;
+    }
+
+    return FileDiffsTrigger;
+})(Trigger);
+
+FileDiffsTrigger.TYPE = "file_diffs";
+
+var LineCommentsTrigger = (function (_Trigger3) {
+    _inherits(LineCommentsTrigger, _Trigger3);
+
+    function LineCommentsTrigger(comments) {
+        _classCallCheck(this, LineCommentsTrigger);
+
+        var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(LineCommentsTrigger).call(this, LineCommentsTrigger.TYPE));
+
+        _this3.comments = comments;
+        return _this3;
+    }
+
+    return LineCommentsTrigger;
+})(Trigger);
+
+LineCommentsTrigger.TYPE = "line_comments";
+
+var PullRequestListTrigger = (function (_Trigger4) {
+    _inherits(PullRequestListTrigger, _Trigger4);
+
+    function PullRequestListTrigger(myPulls, assignedPulls, error) {
+        _classCallCheck(this, PullRequestListTrigger);
+
+        var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(PullRequestListTrigger).call(this, PullRequestListTrigger.TYPE));
+
+        _this4.assignedPulls = assignedPulls;
+        _this4.myPulls = myPulls;
+        _this4.error = error;
+        return _this4;
+    }
+
+    return PullRequestListTrigger;
+})(Trigger);
+
+PullRequestListTrigger.TYPE = "pr_list";
+
+var MergeErrorTrigger = (function (_Trigger5) {
+    _inherits(MergeErrorTrigger, _Trigger5);
+
+    function MergeErrorTrigger(error) {
+        _classCallCheck(this, MergeErrorTrigger);
+
+        var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(MergeErrorTrigger).call(this, MergeErrorTrigger.TYPE));
+
+        _this5.error = error;
+        return _this5;
+    }
+
+    return MergeErrorTrigger;
+})(Trigger);
+
+MergeErrorTrigger.TYPE = "merge_error";
+
+var TRIGGERS = (_TRIGGERS = {}, _defineProperty(_TRIGGERS, PullRequestTrigger.TYPE, PullRequestTrigger), _defineProperty(_TRIGGERS, FileDiffsTrigger.TYPE, FileDiffsTrigger), _defineProperty(_TRIGGERS, LineCommentsTrigger.TYPE, LineCommentsTrigger), _defineProperty(_TRIGGERS, PullRequestListTrigger.TYPE, PullRequestListTrigger), _defineProperty(_TRIGGERS, MergeErrorTrigger.TYPE, MergeErrorTrigger), _TRIGGERS);
+
+module.exports = {
+
+    PullRequestTrigger: PullRequestTrigger,
+    FileDiffsTrigger: FileDiffsTrigger,
+    LineCommentsTrigger: LineCommentsTrigger,
+    PullRequestListTrigger: PullRequestListTrigger,
+    MergeErrorTrigger: MergeErrorTrigger,
+
+    /**
+     * Create a trigger mixin which handles a lot of boilerplate for creating triggers.
+     * @param {TriggerClass[]} triggersToMonitor A list of trigger classes to monitor.
+     * @param {boolean} dontStoreState True to NOT persist the trigger received
+     * in this.state.triggers[Trigger.TYPE]
+     */
+    TriggerMixin: function TriggerMixin(triggersToMonitor, dontStoreState) {
+        triggersToMonitor = triggersToMonitor || [];
+
+        triggersToMonitor.forEach(function (Cls) {
+            if (Object.keys(TRIGGERS).indexOf(Cls.TYPE) === -1) {
+                throw new Error("TriggerMixin: Told to monitor an unknown trigger '" + Cls.TYPE + "'. Did you add it to triggers.js?");
+            }
+        });
+
+        return {
+            componentWillMount: function componentWillMount() {
+                this._dispatcherRef = _dispatcher2.default.register(this._onTrigger);
+            },
+
+            componentWillUnmount: function componentWillUnmount() {
+                _dispatcher2.default.unregister(this._dispatcherRef);
+            },
+
+            _onTrigger: function _onTrigger(trigger) {
+                if (!dontStoreState) {
+                    this.setTrigger(trigger);
+                }
+
+                // call a user supplied callback if given
+                if (this.onTrigger) {
+                    this.onTrigger(trigger);
+                }
+            },
+
+            getInitialState: function getInitialState() {
+                var initial = {
+                    triggers: {}
+                };
+                triggersToMonitor.forEach(function (Cls) {
+                    initial.triggers[Cls.TYPE] = {};
+                });
+                return initial;
+            },
+
+            getTrigger: function getTrigger(TriggerClass) {
+                return this.state.triggers[TriggerClass.TYPE];
+            },
+
+            setTrigger: function setTrigger(trigger) {
+                var existingTriggers = this.state.triggers;
+                existingTriggers[trigger.name] = trigger;
+                this.setState({
+                    triggers: existingTriggers
+                });
+            }
+        };
+    }
+};
+},{"./dispatcher":16,"./models/file-diff":22,"./models/line-comment":23,"./models/pull-request":26}],32:[function(require,module,exports){
+"use strict";
+
+var _triggers = require("../logic/triggers");
+
+var _triggers2 = _interopRequireDefault(_triggers);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequestTrigger, _triggers.FileDiffsTrigger, _triggers.LineCommentsTrigger]);
 
 var React = require("react");
 var CommentBox = require("../components/comment-box");
 var CommentView = require("../components/comment-view");
 var CommentDiffListView = require("../components/comment-diff-list-view");
 var Actions = require("../logic/models/action");
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_info", "file_diffs", "line_comments"]);
-var dispatcher = require("../logic/dispatcher");
 
 module.exports = React.createClass({ displayName: 'ActionsPage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
 
     propTypes: {
         controller: React.PropTypes.any.isRequired
@@ -3273,26 +3649,6 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
     // navigating first mount
     componentDidMount: function componentDidMount() {
         this._loadDiffs(this.props);
-        this._disRef = dispatcher.register(this.onReceiveAction);
-    },
-
-    onReceiveAction: function onReceiveAction(payload) {
-        if (payload.action === "line_comments" && this.state.actions) {
-            // force refresh the actions to show the new comment. This
-            // is done horribly currently by ticking to make sure the ActionMixin
-            // has set the new state, which we then refresh from.
-            /*
-            var self = this;
-            setTimeout(function() { console.log("timeout");
-                self.setState({
-                    actions: Actions.fromLineComments(self.state.line_comments.comments)
-                });
-            }, 0); */
-        }
-    },
-
-    componentWillUnmount: function componentWillUnmount() {
-        dispatcher.unregister(this._disRef);
     },
 
     // navigating once mounted
@@ -3304,9 +3660,10 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
         if (this.state.actions) {
             return;
         }
-        if (this.state.line_comments && this.state.line_comments.comments) {
+        var lineCommentsTrigger = this.getTrigger(_triggers.LineCommentsTrigger);
+        if (lineCommentsTrigger && lineCommentsTrigger.comments) {
             this.setState({
-                actions: Actions.fromLineComments(this.state.line_comments.comments)
+                actions: Actions.fromLineComments(lineCommentsTrigger.comments)
             });
         }
     },
@@ -3315,11 +3672,8 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
         // set the pr if we already know it.
         var pullRequest = this.props.controller.getPullRequest();
         if (pullRequest) {
-            this.setState({
-                pr_info: {
-                    pr: pullRequest
-                }
-            });
+            var prTrigger = new _triggers2.default.PullRequestTrigger(pullRequest);
+            this.setTrigger(prTrigger);
         }
         var ownerRepo = props.params.owner + "/" + props.params.repo;
         var pr = props.params.pr;
@@ -3358,7 +3712,7 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
     },
 
     onSubmitLineReply: function onSubmitLineReply(action, text) {
-        return this.props.controller.postReplyLineComment(this.state.pr_info.pr, text, action.getHeadComment());
+        return this.props.controller.postReplyLineComment(this.getTrigger(_triggers.PullRequestTrigger).pr, text, action.getHeadComment());
     },
 
     getActionJsx: function getActionJsx(action, index, isDone) {
@@ -3390,7 +3744,7 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
 
     render: function render() {
         var self = this;
-        var pr = this.state.pr_info.pr;
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
         if (!pr || !this.state.actions) {
             return React.createElement(
                 "div",
@@ -3429,26 +3783,24 @@ module.exports = React.createClass({ displayName: 'ActionsPage',
         );
     }
 });
-},{"../components/comment-box":2,"../components/comment-diff-list-view":3,"../components/comment-view":5,"../logic/actions":13,"../logic/dispatcher":17,"../logic/models/action":20,"react":585}],33:[function(require,module,exports){
+},{"../components/comment-box":2,"../components/comment-diff-list-view":3,"../components/comment-view":5,"../logic/models/action":19,"../logic/triggers":31,"react":585}],33:[function(require,module,exports){
 "use strict";
 
+var _triggers = require("../logic/triggers");
+
 var React = require("react");
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_info"]);
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequestTrigger]);
 var CommitListView = require("../components/commit-list-view");
 
 module.exports = React.createClass({ displayName: 'CommitsPage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
 
     componentDidMount: function componentDidMount() {
-        this.setState({
-            pr_info: {
-                pr: this.props.controller.getPullRequest()
-            }
-        });
+        this.setTrigger(new _triggers.PullRequestTrigger(this.props.controller.getPullRequest()));
     },
 
     render: function render() {
-        var pr = this.state.pr_info.pr;
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
         if (!pr) {
             return React.createElement(
                 "div",
@@ -3460,15 +3812,21 @@ module.exports = React.createClass({ displayName: 'CommitsPage',
             repo: pr.getRepo(), req: pr.getId() });
     }
 });
-},{"../components/commit-list-view":6,"../logic/actions":13,"react":585}],34:[function(require,module,exports){
+},{"../components/commit-list-view":6,"../logic/triggers":31,"react":585}],34:[function(require,module,exports){
 "use strict";
 
+var _triggers = require("../logic/triggers");
+
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequestTrigger, _triggers.FileDiffsTrigger, _triggers.LineCommentsTrigger]);
 var React = require("react");
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_info", "file_diffs", "line_comments"]);
 var FileDiffListView = require("../components/file-diff-list-view");
 
 module.exports = React.createClass({ displayName: 'DiffsPage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
+
+    propTypes: {
+        controller: React.PropTypes.any.isRequired
+    },
 
     // navigating first mount
     componentDidMount: function componentDidMount() {
@@ -3484,11 +3842,7 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
         // set the pr if we already know it.
         var pullRequest = this.props.controller.getPullRequest();
         if (pullRequest) {
-            this.setState({
-                pr_info: {
-                    pr: pullRequest
-                }
-            });
+            this.setTrigger(new _triggers.PullRequestTrigger(pullRequest));
         }
         var ownerRepo = props.params.owner + "/" + props.params.repo;
         var pr = props.params.pr;
@@ -3496,15 +3850,15 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
     },
 
     onSubmitReplyToComment: function onSubmitReplyToComment(path, lineComment, text) {
-        return this.props.controller.postReplyLineComment(this.state.pr_info.pr, text, lineComment);
+        return this.props.controller.postReplyLineComment(this.getTrigger(_triggers.PullRequestTrigger).pr, text, lineComment);
     },
 
     onSubmitLineComment: function onSubmitLineComment(path, pos, text) {
-        return this.props.controller.postLineComment(this.state.pr_info.pr, text, path, pos);
+        return this.props.controller.postLineComment(this.getTrigger(_triggers.PullRequestTrigger).pr, text, path, pos);
     },
 
     render: function render() {
-        var pr = this.state.pr_info.pr;
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
         if (!pr) {
             return React.createElement(
                 "div",
@@ -3512,37 +3866,36 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
                 "Loading pull request..."
             );
         }
-        var fileDiffs = this.state.file_diffs ? this.state.file_diffs.files : [];
-        var lineComments = this.state.line_comments ? this.state.line_comments.comments : [];
+        var fileDiffs = this.getTrigger(_triggers.FileDiffsTrigger).files || [];
+        var lineComments = this.getTrigger(_triggers.LineCommentsTrigger).comments || [];
         return React.createElement(FileDiffListView, { diffs: fileDiffs, comments: lineComments, pr: pr,
             onReplyToComment: this.onSubmitReplyToComment,
-            onLineComment: this.onSubmitLineComment });
+            onLineComment: this.onSubmitLineComment,
+            controller: this.props.controller });
     }
 });
-},{"../components/file-diff-list-view":8,"../logic/actions":13,"react":585}],35:[function(require,module,exports){
+},{"../components/file-diff-list-view":8,"../logic/triggers":31,"react":585}],35:[function(require,module,exports){
 "use strict";
 
+var _triggers = require("../logic/triggers");
+
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequestTrigger]);
 var React = require("react");
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_info"]);
 var CommentListView = require("../components/comment-list-view");
 
 module.exports = React.createClass({ displayName: 'HistoryPage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
 
     componentDidMount: function componentDidMount() {
-        this.setState({
-            pr_info: {
-                pr: this.props.controller.getPullRequest()
-            }
-        });
+        this.setTrigger(new _triggers.PullRequestTrigger(this.props.controller.getPullRequest()));
     },
 
     onSubmitOverviewComment: function onSubmitOverviewComment(text) {
-        return this.props.controller.postOverviewComment(this.state.pr_info.pr, text);
+        return this.props.controller.postOverviewComment(this.getTrigger(_triggers.PullRequestTrigger).pr, text);
     },
 
     render: function render() {
-        var pr = this.state.pr_info.pr;
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
         if (!pr) {
             return React.createElement(
                 "div",
@@ -3554,19 +3907,20 @@ module.exports = React.createClass({ displayName: 'HistoryPage',
             onSubmitComment: this.onSubmitOverviewComment });
     }
 });
-},{"../components/comment-list-view":4,"../logic/actions":13,"react":585}],36:[function(require,module,exports){
+},{"../components/comment-list-view":4,"../logic/triggers":31,"react":585}],36:[function(require,module,exports){
 "use strict";
 
+var _triggers = require("../logic/triggers");
+
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequestListTrigger]);
 var React = require("react");
 var Link = require("react-router").Link;
 
 // Values of _renderPRs's display param
 var displayOwner = "displayOwner";
 
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_list"]);
-
 module.exports = React.createClass({ displayName: 'ListPage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
 
     propTypes: {
         listController: React.PropTypes.any,
@@ -3574,7 +3928,7 @@ module.exports = React.createClass({ displayName: 'ListPage',
     },
 
     render: function render() {
-        var prList = this.state.pr_list;
+        var prList = this.getTrigger(_triggers.PullRequestListTrigger);
         if (!prList || Object.keys(prList).length === 0) {
             this.props.listController.getOpenPullRequests();
             return React.createElement(
@@ -3668,80 +4022,104 @@ module.exports = React.createClass({ displayName: 'ListPage',
         )];
     }
 });
-},{"../logic/actions":13,"react":585,"react-router":404}],37:[function(require,module,exports){
+},{"../logic/triggers":31,"react":585,"react-router":404}],37:[function(require,module,exports){
 "use strict";
 
-var React = require("react");
+var _triggers = require("../logic/triggers");
 
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_info"]);
+var React = require("react");
+var CommitListView = require("../components/commit-list-view");
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.MergeErrorTrigger, _triggers.PullRequestTrigger]);
+
+var SQUASH_REWRITING_HISTORY = "Squash rewriting history";
+var SQUASH_MERGE = "Squash leaving PR closed not merged";
+var MERGE_WITHOUT_SQUASH = "Merge without squashing";
 
 module.exports = React.createClass({ displayName: 'MergePage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
 
     componentDidMount: function componentDidMount() {
+        this.setTrigger(new _triggers.PullRequestTrigger(this.props.controller.getPullRequest()));
+    },
+
+    getInitialState: function getInitialState() {
+        // TODO: Also do this when re-selecting the tab
+        return {
+            flowStage: "selectMergeKind",
+            mergeKind: null,
+            commitMessage: null
+        };
+    },
+
+    promptForCommitMessage: function promptForCommitMessage(event) {
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
+
+        var commitMessage = pr.getTitle();
+        if (pr.getBody()) {
+            commitMessage += "\n\n" + pr.getBody();
+        }
+
+        if (event.target.textContent === SQUASH_MERGE) {
+            commitMessage += "\n\nSquash-merged from pull request #" + pr.getId();
+        } else if (event.target.textContent === MERGE_WITHOUT_SQUASH) {
+            commitMessage = "Merge pull request # " + pr.getId() + " from " + (pr.getSource().getUser().name + "/" + pr.getSource().getRef());
+        }
+
         this.setState({
-            pr_info: {
-                pr: this.props.controller.getPullRequest()
-            }
+            flowStage: "wantCommitMessage",
+            mergeKind: event.target.textContent,
+            commitMessage: commitMessage
         });
     },
 
-    squashMergeWithRewrite: function squashMergeWithRewrite(event) {
-        var pr = this.state.pr_info.pr;
-        var commitMessage = pr.getTitle();
-        if (pr.getBody()) {
-            commitMessage += "\n\n" + pr.getBody();
+    doMerge: function doMerge() {
+        this.setState({ flowStage: "merging" });
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
+        if (this.state.mergeKind === SQUASH_REWRITING_HISTORY) {
+            this.props.controller.squashMergeWithRewrite(pr, this.state.commitMessage);
+        } else if (this.state.mergeKind === SQUASH_MERGE) {
+            this.props.controller.squashMergeWithoutRewrite(pr, this.state.commitMessage);
+        } else if (this.state.mergeKind === MERGE_WITHOUT_SQUASH) {
+            this.props.controller.merge(pr, this.state.commitMessage);
         }
-        this.props.controller.squashMergeWithRewrite(pr, commitMessage);
     },
 
-    squashMergeWithoutRewrite: function squashMergeWithoutRewrite(event) {
-        var pr = this.state.pr_info.pr;
-        var commitMessage = pr.getTitle();
-        if (pr.getBody()) {
-            commitMessage += "\n\n" + pr.getBody();
-        }
-        commitMessage += "\n\nSquash-merged from pull request #" + pr.getTitle() + " from " + pr.getSource().getUser().name + "/" + pr.getSource().getRef();
-        this.props.controller.squashMergeWithoutRewrite(pr, commitMessage);
+    gotMergeError: function gotMergeError() {
+        return Object.keys(this.getTrigger(_triggers.MergeErrorTrigger).error).length !== 0;
     },
 
-    merge: function merge(event) {
-        var pr = this.state.pr_info.pr;
-        var commitMessage = "Merge pull request #" + pr.getId() + " from " + pr.getSource().getUser().name + "/" + pr.getSource().getRef();
-        if (pr.getTitle()) {
-            commitMessage += "\n\n" + pr.getTitle();
-        }
-        this.props.controller.merge(pr, commitMessage);
+    onChangeText: function onChangeText(event) {
+        this.setState({ commitMessage: event.target.value });
     },
 
     render: function render() {
-        var pr = this.state.pr_info.pr;
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
         if (!pr || Object.keys(pr).length === 0) {
             return React.createElement(
                 "div",
-                null,
+                { className: "MergeOptionContainer" },
                 "Loading pull request..."
             );
         }
         if (pr.getState() === "merged") {
             return React.createElement(
                 "div",
-                null,
-                "Already merged"
+                { className: "MergeOptionContainer" },
+                "PR has been merged"
             );
         }
         var mergeable = pr.getMergeable();
         if (mergeable === null) {
             return React.createElement(
                 "div",
-                null,
+                { className: "MergeOptionContainer" },
                 "Mergeable state unknown; check again soon"
             );
         }
         if (!mergeable) {
             return React.createElement(
                 "div",
-                null,
+                { className: "MergeOptionContainer" },
                 "PR is not mergeable; try merging ",
                 pr.getDest().getRef(),
                 " out into ",
@@ -3749,39 +4127,87 @@ module.exports = React.createClass({ displayName: 'MergePage',
                 "."
             );
         }
-        return React.createElement(
-            "div",
-            null,
-            React.createElement(
-                "a",
-                { onClick: this.squashMergeWithRewrite },
-                "Squash rewriting history"
-            ),
-            React.createElement("br", null),
-            React.createElement(
-                "a",
-                { onClick: this.squashMergeWithoutRewrite },
-                "Squash leaving PR closed not merged"
-            ),
-            React.createElement("br", null),
-            React.createElement(
-                "a",
-                { onClick: this.merge },
-                "Merge without squashing"
-            )
-        );
+        if (this.state.flowStage === "selectMergeKind") {
+            return React.createElement(
+                "div",
+                { className: "MergeOptionContainer" },
+                React.createElement(
+                    "span",
+                    { onClick: this.promptForCommitMessage, className: "link" },
+                    SQUASH_REWRITING_HISTORY
+                ),
+                React.createElement("br", null),
+                React.createElement(
+                    "span",
+                    { onClick: this.promptForCommitMessage, className: "link" },
+                    SQUASH_MERGE
+                ),
+                React.createElement("br", null),
+                React.createElement(
+                    "span",
+                    { onClick: this.promptForCommitMessage, className: "link" },
+                    MERGE_WITHOUT_SQUASH
+                ),
+                React.createElement("br", null),
+                React.createElement("br", null),
+                "Commits:",
+                React.createElement(CommitListView, {
+                    commits: pr.getCommits(), repo: pr.getRepo(), req: pr.getId() })
+            );
+        } else if (this.state.flowStage === "wantCommitMessage" || this.state.flowStage === "merging") {
+            var mergeState = "mergable";
+            var mergeText = "Merge";
+            if (this.gotMergeError()) {
+                mergeState = "error";
+                mergeText = "Error merging";
+            } else if (this.state.flowStage === "merging") {
+                mergeState = "merging";
+                mergeText = "Merging...";
+            }
+            return React.createElement(
+                "div",
+                null,
+                React.createElement(
+                    "div",
+                    { className: "MergeOptionContainer" },
+                    React.createElement(
+                        "h2",
+                        null,
+                        this.state.mergeKind
+                    ),
+                    "Commit message:",
+                    React.createElement("br", null),
+                    React.createElement("textarea", { className: "CommentBox_textarea",
+                        onChange: this.onChangeText,
+                        value: this.state.commitMessage,
+                        disabled: this.state.flowStage === "merging" }),
+                    React.createElement("br", null),
+                    React.createElement(
+                        "span",
+                        { onClick: this.doMerge, className: "MergeButton_" + mergeState },
+                        mergeText
+                    )
+                ),
+                React.createElement("br", null),
+                "Commits:",
+                React.createElement(CommitListView, {
+                    commits: pr.getCommits(), repo: pr.getRepo(), req: pr.getId() })
+            );
+        }
     }
 });
-},{"../logic/actions":13,"react":585}],38:[function(require,module,exports){
+},{"../components/commit-list-view":6,"../logic/triggers":31,"react":585}],38:[function(require,module,exports){
 "use strict";
+
+var _triggers = require("../logic/triggers");
 
 var React = require("react");
 var Link = require("react-router").Link;
 
-var ActionMixin = require("../logic/actions").ActionMixin(["pr_info"]);
+var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequestTrigger]);
 
 module.exports = React.createClass({ displayName: 'PullRequestPage',
-    mixins: [ActionMixin],
+    mixins: [TriggerMixin],
 
     // navigating first mount
     componentDidMount: function componentDidMount() {
@@ -3815,7 +4241,7 @@ module.exports = React.createClass({ displayName: 'PullRequestPage',
     },
 
     render: function render() {
-        var pr = this.state.pr_info.pr;
+        var pr = this.getTrigger(_triggers.PullRequestTrigger).pr;
         if (!pr || Object.keys(pr).length === 0) {
             return React.createElement(
                 "div",
@@ -3917,7 +4343,7 @@ module.exports = React.createClass({ displayName: 'PullRequestPage',
         );
     }
 });
-},{"../logic/actions":13,"react":585,"react-router":404}],39:[function(require,module,exports){
+},{"../logic/triggers":31,"react":585,"react-router":404}],39:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
