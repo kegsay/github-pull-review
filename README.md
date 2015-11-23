@@ -18,6 +18,7 @@ This is all also hosted on [Github pages](http://kegsay.github.io/github-pull-re
 ## Difference between GPR and Github's UI
 
 Currently, GPR does the following over and above Github's UI:
+ - Show a list of "Actions" that need to be done. An action is a series of comments on the same line. It is marked as "done" when the final comment starts with "done".
  - Provides buttons along with each line comment to see "this file *when* this comment was made" and "this file *after* this comment was made"
  - Show line comments that were made on this file several commits ago (Github doesn't show these at all, GPR gates them behind "Show all comments")
  - Show/Hide per-file
