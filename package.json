@@ -36,7 +36,7 @@
     "test": "npm run typecheck && npm run build && npm run lint",
     "lint": "eslint lib",
     "typecheck": "flow check lib/",
-    "watch": "parallelshell \"babel --presets es2015,react --watch lib/ --out-dir gen/\" \"watchify -e gen/app.js -o build/bundle.js\""
+    "watch": "parallelshell \"babel --watch lib/ --out-dir gen/\" \"watchify -e gen/app.js -o build/bundle.js\""
   },
   "repository": {
     "type": "git",
