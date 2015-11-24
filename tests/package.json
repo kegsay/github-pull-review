@@ -1,0 +1,18 @@
+{
+  "name": "github-pull-review-tests",
+  "version": "0.1.0",
+  "description": "Tests for a better UI for doing Github Pull Requests",
+  "main": "index.js",
+  "scripts": {
+    "testui": "mocha ui/merge.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kegsay/github-pull-review.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "mocha": "^2.3.3",
+    "selenium-webdriver": "^2.48.2"
+  }
+}
