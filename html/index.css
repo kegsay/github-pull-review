@@ -124,10 +124,30 @@ table td:first-child {
     cursor: pointer;
 }
 
-span.link {
-    text-decoration: underline;
+.CloseButton {
+    background-color: #bd2c00;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
     cursor: pointer;
-    color: -webkit-link;
+}
+
+.OpenButton {
+    background-color: #6cc644;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .MergeOptionContainer {
