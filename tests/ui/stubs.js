@@ -56,12 +56,12 @@ Stubs.prototype.getGithubRequest = function(path) {
 
 Stubs.prototype.stub = function(pr) {
     var pullPage = clone(pr.pullPage)
-    this.githubPathsToServe["/repos/" + pr.user + "/" + pr.repo + "/pulls/" + pr.id] = pullPage;
-    this.githubPathsToServe["/repos/" + pr.user + "/" + pr.repo + "/pulls/" + pr.id + "/commits"] = clone(pr.commitsPage);
-    this.githubPathsToServe["/repos/" + pr.user + "/" + pr.repo + "/issues/" + pr.id + "/comments"] = clone(pr.commentsPage);
-    this.githubPathsToServe["/repos/" + pr.user + "/" + pr.repo + "/pulls/" + pr.id + "/merge"] = clone(pr.mergePage);
+    this.githubPathsToServe[`/repos/${pr.user}/${pr.repo}/pulls/${pr.id}`] = pullPage;
+    this.githubPathsToServe[`/repos/${pr.user}/${pr.repo}/pulls/${pr.id}/commits`] = clone(pr.commitsPage);
+    this.githubPathsToServe[`/repos/${pr.user}/${pr.repo}/issues/${pr.id}/comments`] = clone(pr.commentsPage);
+    this.githubPathsToServe[`/repos/${pr.user}/${pr.repo}/pulls/${pr.id}/merge`] = clone(pr.mergePage);
 
-    var mergePath = "/repos/" + pr.user + "/" + pr.repo + "/pulls/" + pr.id + "/merge";
+    var mergePath = `/repos/${pr.user}/${pr.repo}/pulls/${pr.id}/merge`;
     this.mergeFunctions[mergePath] = (req, cb) => {
         pullPage.merged = true;
         pullPage.merged_by = {
