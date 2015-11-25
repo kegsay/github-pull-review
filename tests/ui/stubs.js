@@ -8,6 +8,20 @@ var promise = require("selenium-webdriver").promise;
 
 var stubdata = require("./stubdata");
 
+/**
+ * Stubs sets up a stub environment for running UI tests against GPR.
+ *
+ * It serves up GPR (assuming it has already been built), and stubs the github
+ * API and supplementary API on separate ports.
+ *
+ * Usage:
+ * Call stubs.init(driver) to configure driver to use the stub endpoints.
+ * This will add a function to driver: getGprPage(path) which will navigate the
+ * driver to that page in GPR, e.g. driver.getGprPage("/list").
+ *
+ * The public exported functions on Stubs are documented for how to configure
+ * the stubs.
+ */
 function Stubs() {
     this.reset();
 }
@@ -38,22 +52,36 @@ Stubs.prototype.init = function(driver) {
         });
 };
 
+/**
+ * Return 200 OK, and the SHA abc123 in response to the next supplementary API
+ * /rewritehistory request.
+ */
 Stubs.prototype.queueSuccessfulRewriteHistory = function() {
     this.rewriteHistoryQueue.push(true);
 };
 
+/**
+ * Return 500 Internal Server Error to the next supplementary API
+ * /rewritehistory request.
+ */
 Stubs.prototype.queueUnsuccessfulRewriteHistory = function() {
     this.rewriteHistoryQueue.push(false);
 };
 
-Stubs.prototype.queueSuccessfulSquashMerge = function() {
-    this.squashMergeQueue.push(true);
-};
-
+/**
+ * Returns the most POST body of the most recent request to the passed github
+ * API path as a string.
+ */
 Stubs.prototype.getGithubRequest = function(path) {
     return this.githubRequests[path];
 };
 
+/**
+ * Have github serve the passed PR object under all of its relevant API
+ * endpoint paths.
+ *
+ * Sample PRs can be found in ./stubdata.js
+ */
 Stubs.prototype.stub = function(pr) {
     var pullPage = clone(pr.pullPage)
     this.githubPathsToServe[`/repos/${pr.user}/${pr.repo}/pulls/${pr.id}`] = pullPage;
@@ -76,10 +104,11 @@ Stubs.prototype.stub = function(pr) {
     }
 };
 
+/**
+ * Clear all stubs and recorded data.
+ */
 Stubs.prototype.reset = function() {
     this.rewriteHistoryQueue = [];
-    this.squashMergeQueue = [];
-    this.mergeQueue = [];
     this.githubPathsToServe = {};
     this.mergeFunctions = {};
     this.githubRequests = {};
@@ -89,7 +118,7 @@ Stubs.prototype.reset = function() {
 
 Stubs.prototype._serveGpr = function() {
     var server = http.createServer(
-        (req, res) => handle(
+        (req, res) => handleGprRequest(
             "../build" + req.url,
             res,
             /*expandIndex=*/true
@@ -151,8 +180,7 @@ Stubs.prototype._serveSupplementary = function() {
                 response.write("ok");
                 response.end();
             }
-            else if ((u.pathname === "/squashmerge" && this.squashMergeQueue.pop()) ||
-                (u.pathname === "/rewritehistory" && this.rewriteHistoryQueue.pop())) {
+            else if (u.pathname === "/rewritehistory" && this.rewriteHistoryQueue.pop()) {
                 response.writeHead(200, headers);
                 response.write(JSON.stringify({
                     sha: "abc123",
@@ -177,7 +205,7 @@ Stubs.prototype._serveSupplementary = function() {
     return portPromise;
 };
 
-function handle(path, response, expandIndex) {
+function handleGprRequest(path, response, expandIndex) {
     fs.stat(path, function(err, stat) {
         if (path.length >= "/healthz".length && path.substring(path.length - "/healthz".length) === "/healthz") {
             response.writeHead(200, headers);
@@ -189,7 +217,7 @@ function handle(path, response, expandIndex) {
             return notfound(response);
         }
         if (expandIndex && stat.isDirectory()) {
-            return handle(path + "/index.html", response, /*expandIndex=*/false);
+            return handleGprRequest(path + "/index.html", response, /*expandIndex=*/false);
         } else if (err) {
             return error(response, err);
         } else if (!stat.isFile()) {
