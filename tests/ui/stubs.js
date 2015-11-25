@@ -32,7 +32,7 @@ Stubs.prototype.init = function(driver) {
             driver.executeScript("window.localStorage['github_api_endpoint'] = '" + bases[1] + "';");
             driver.executeScript("window.localStorage['supplementary_api_endpoint'] = '" + bases[2] + "';");
             driver.executeScript("window.localStorage['github_delays'] = '" +
-                JSON.stringify({POST_MERGE: 10, POST_PUSH: 10}) + "';");
+                JSON.stringify({POST_MERGE_MS: 10, POST_PUSH_MS: 10}) + "';");
             driver.getHealthz();
             return promise.fulfilled();
         });
