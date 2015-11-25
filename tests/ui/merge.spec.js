@@ -9,6 +9,8 @@ var until = require("selenium-webdriver").until;
 var test = require("selenium-webdriver/testing");
 var assert = require("selenium-webdriver/testing/assert");
 
+var utils = require("./utils");
+
 test.describe("Merge page", function() {
     this.timeout(5000);
 
@@ -54,7 +56,7 @@ test.describe("Merge page", function() {
             stubs.queueSuccessfulRewriteHistory();
             driver.findElement(By.css(".MergeOptionContainer > span.link:nth-of-type(1)")).click();
             driver.findElement(By.tagName("textarea")).sendKeys(
-                keysToDelete("PR title"), "my commit message"
+                utils.keysToDelete("PR title"), "my commit message"
             );
             stubs.queueSuccessfulRewriteHistory();
             driver.findElement(By.className("MergeButton_mergable")).click();
@@ -73,14 +75,6 @@ test.describe("Merge page", function() {
             driver.findElement(By.className("MergeButton_mergable")).click();
             driver.findElement(By.className("MergeButton_merging")).getText()
                 .then((text) => assert(text).equalTo("Merging..."));
-        }
-
-        function keysToDelete(str) {
-            var ret = "";
-            for (var i = 0; i < str.length; ++i) {
-                ret += webdriver.Key.BACK_SPACE;
-            }
-            return ret;
         }
     });
 });
