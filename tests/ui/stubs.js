@@ -143,7 +143,7 @@ Stubs.prototype._serveGithub = function() {
 
             var mergeFunction = this.mergeFunctions[u.pathname];
             if (!mergeFunction) {
-                mergeFunction = function(req, cb) { cb(); };
+                mergeFunction = function(_, cb) { cb(); };
             }
             mergeFunction(req, () => {
                 if (this.githubPathsToServe[u.pathname]) {
@@ -214,19 +214,25 @@ function handleGprRequest(path, response, expandIndex) {
             return;
         }
         if (err && err.code === "ENOENT") {
-            return notfound(response);
-        }
-        if (expandIndex && stat.isDirectory()) {
-            return handleGprRequest(path + "/index.html", response, /*expandIndex=*/false);
-        } else if (err) {
-            return error(response, err);
-        } else if (!stat.isFile()) {
-            return notfound(response);
+            notfound(response);
             return;
         }
-        fs.readFile(path, function(err, data) {
-            if (err) {
-                return error(response, err);
+        if (expandIndex && stat.isDirectory()) {
+            handleGprRequest(path + "/index.html", response, /*expandIndex=*/false);
+            return;
+        }
+        else if (err) {
+            error(response, err);
+            return;
+        }
+        else if (!stat.isFile()) {
+            notfound(response);
+            return;
+        }
+        fs.readFile(path, function(err2, data) {
+            if (err2) {
+                error(response, err2);
+                return;
             }
             response.writeHead(200, headers);
             response.write(data)

@@ -1,5 +1,7 @@
 "use strict";
 
+/* eslint no-invalid-this:0 */
+
 var Stubs = require("./stubs");
 var stubdata = require("./stubdata");
 
