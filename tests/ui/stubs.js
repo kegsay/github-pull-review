@@ -69,8 +69,8 @@ Stubs.prototype.queueUnsuccessfulRewriteHistory = function() {
 };
 
 /**
- * Returns the most POST body of the most recent request to the passed github
- * API path as a string.
+ * Returns the POST body of the most recent request to the passed github API
+ * path as a string.
  */
 Stubs.prototype.getGithubRequest = function(path) {
     return this.githubRequests[path];
