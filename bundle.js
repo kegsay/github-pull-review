@@ -18,13 +18,15 @@ var ListController = require("./logic/list-controller");
 // do the logic dependency graph ^___^
 var sessionStore = new SessionStore(window.localStorage);
 var dispatcher = require("./logic/dispatcher");
-var httpApi = new GithubApi("https://api.github.com", "https://review.rocks", sessionStore.getAccessToken());
+
+var httpApi = new GithubApi(sessionStore.getGithubApiEndpoint(), sessionStore.getSupplementaryApiEndpoint(), sessionStore.getAccessToken());
 var diffController = new DiffController(httpApi);
-var ctrl = new Controller(dispatcher, httpApi, diffController);
+
+var ctrl = new Controller(dispatcher, httpApi, diffController, sessionStore.getGithubDelays());
 ctrl.init();
 
 var listController = new ListController(dispatcher, httpApi, ctrl);
-
+console.log("I am a fish");
 // DEBUGGING
 global.gpr_ctrl = ctrl;
 
@@ -311,7 +313,9 @@ module.exports = React.createClass({ displayName: 'CommentView',
     propTypes: {
         onToggleCommits: React.PropTypes.func,
         comment: React.PropTypes.any.isRequired,
-        onMarkDone: React.PropTypes.func // presence determines checkbox
+        onMarkDone: React.PropTypes.func, // presence determines checkbox
+        onAnchorClick: React.PropTypes.func,
+        id: React.PropTypes.string
     },
 
     getDefaultProps: function getDefaultProps() {
@@ -345,9 +349,6 @@ module.exports = React.createClass({ displayName: 'CommentView',
             lineCommentHeader = React.createElement(
                 "span",
                 null,
-                "(",
-                comment.getShortSha(),
-                ")",
                 React.createElement("input", { type: "image", src: "img/base2cmt.png", className: "CommentView_commitToggle",
                     title: "View diff when this comment was made",
                     onClick: this._onToggleCommits.bind(this, true) }),
@@ -374,9 +375,15 @@ module.exports = React.createClass({ displayName: 'CommentView',
             );
         }
 
+        var anchor;
+        if (this.props.onAnchorClick) {
+            anchor = React.createElement("img", { src: "img/anchor.png", className: "CommentView_anchorLink",
+                onClick: this.props.onAnchorClick });
+        }
+
         return React.createElement(
             "div",
-            { className: "CommentView" },
+            { className: "CommentView", id: this.props.id },
             React.createElement("img", { className: "CommentView_avatar", src: comment.getUser().getAvatarUrl() }),
             React.createElement(
                 "div",
@@ -384,7 +391,8 @@ module.exports = React.createClass({ displayName: 'CommentView',
                 comment.getUser().getUserLinkJsx(),
                 " commented ",
                 comment.getTimeAgo(),
-                " ago ",
+                " ago",
+                anchor,
                 React.createElement(
                     "a",
                     { href: comment.getLink(), target: "_blank" },
@@ -513,12 +521,14 @@ module.exports = React.createClass({ displayName: 'FileDiffListView',
         onLineComment: React.PropTypes.func.isRequired,
         controller: React.PropTypes.any.isRequired,
         diffs: React.PropTypes.array.isRequired,
-        onFileLineClick: React.PropTypes.func // fn(FileDiff, lineId, Line)
+        onFileLineClick: React.PropTypes.func, // fn(FileDiff, lineId, Line)
+        onFileCommentClick: React.PropTypes.func // fn(FileDiff, Comment, anchorId)
     },
 
     getDefaultProps: function getDefaultProps() {
         return {
-            onFileLineClick: function onFileLineClick() {}
+            onFileLineClick: function onFileLineClick() {},
+            onFileCommentClick: function onFileCommentClick() {}
         };
     },
 
@@ -551,7 +561,8 @@ module.exports = React.createClass({ displayName: 'FileDiffListView',
                         onLineComment: self.props.onLineComment,
                         controller: self.props.controller,
                         key: i,
-                        onLineClick: self.props.onFileLineClick });
+                        onLineClick: self.props.onFileLineClick,
+                        onCommentClick: self.props.onFileCommentClick });
                 })
             )
         );
@@ -578,12 +589,14 @@ module.exports = React.createClass({ displayName: 'FileDiffView',
         comments: React.PropTypes.array.isRequired,
         diff: React.PropTypes.any.isRequired,
         controller: React.PropTypes.any.isRequired,
-        onLineClick: React.PropTypes.func // fn(FileDiff, lineId: String, Line)
+        onLineClick: React.PropTypes.func, // fn(FileDiff, lineId: String, Line)
+        onCommentClick: React.PropTypes.func // fn(FileDiff, Comment, commentAnchorId)
     },
 
     getDefaultProps: function getDefaultProps() {
         return {
-            onLineClick: function onLineClick() {}
+            onLineClick: function onLineClick() {},
+            onCommentClick: function onCommentClick() {}
         };
     },
 
@@ -741,6 +754,10 @@ module.exports = React.createClass({ displayName: 'FileDiffView',
         this.props.onLineClick(this.props.diff, lineId, line);
     },
 
+    _onCommentClick: function _onCommentClick(comment, anchorId) {
+        this.props.onCommentClick(this.props.diff, comment, anchorId);
+    },
+
     render: function render() {
         var self = this;
         var diff = this.props.diff;
@@ -849,7 +866,8 @@ module.exports = React.createClass({ displayName: 'FileDiffView',
                 fileExt: selDiff.getFileExtension(),
                 onToggleCommits: self.onToggleCommits,
                 filePath: diff.getFilePathString(),
-                onLineClick: this._onPatchLineClick });
+                onLineClick: this._onPatchLineClick,
+                onCommentClick: this._onCommentClick });
         }
 
         return React.createElement(
@@ -1023,6 +1041,10 @@ function createAnchorId(filepath, lineNo, isLeft) {
     return "diff-" + md5(filepath) + sep + lineNo;
 }
 
+function createCommentAnchorId(comment) {
+    return "cmt-" + comment.getComment().getId();
+}
+
 module.exports = React.createClass({ displayName: 'PatchView',
     propTypes: {
         showUnified: React.PropTypes.bool.isRequired,
@@ -1034,7 +1056,8 @@ module.exports = React.createClass({ displayName: 'PatchView',
         onToggleCommits: React.PropTypes.func,
         enableComments: React.PropTypes.bool,
         filePath: React.PropTypes.string,
-        onLineClick: React.PropTypes.func // fn(lineId: String, Line)
+        onLineClick: React.PropTypes.func, // fn(lineId: String, Line)
+        onCommentClick: React.PropTypes.func // fn(cmt: Comment)
     },
 
     getInitialState: function getInitialState() {
@@ -1046,12 +1069,17 @@ module.exports = React.createClass({ displayName: 'PatchView',
     getDefaultProps: function getDefaultProps() {
         return {
             onToggleCommits: function onToggleCommits() {},
+            onCommentClick: function onCommentClick() {},
             enableComments: true
         };
     },
 
     onToggleCommits: function onToggleCommits(cmt, wantPrev) {
         this.props.onToggleCommits(cmt, wantPrev);
+    },
+
+    onCommentClick: function onCommentClick(cmt) {
+        this.props.onCommentClick(cmt, createCommentAnchorId(cmt));
     },
 
     componentDidUpdate: function componentDidUpdate() {
@@ -1068,7 +1096,7 @@ module.exports = React.createClass({ displayName: 'PatchView',
 
     createAnchor: function createAnchor(lineNo, isLeft) {
         if (!this.props.filePath) {
-            return;
+            return null;
         }
         return createAnchorId(this.props.filePath, lineNo, isLeft);
     },
@@ -1222,8 +1250,9 @@ module.exports = React.createClass({ displayName: 'PatchView',
                     React.createElement(
                         "td",
                         null,
-                        React.createElement(CommentView, { comment: cmt,
-                            onToggleCommits: self.onToggleCommits.bind(self, cmt) })
+                        React.createElement(CommentView, { comment: cmt, id: createCommentAnchorId(cmt),
+                            onToggleCommits: self.onToggleCommits.bind(self, cmt),
+                            onAnchorClick: self.onCommentClick.bind(self, cmt) })
                     )
                 ));
             });
@@ -1342,16 +1371,18 @@ module.exports = React.createClass({ displayName: 'PatchView',
                         // CommentView!)
                         self, leftComments[leftComments.length - 2]) });
                 }
-                return React.createElement(CommentView, { comment: cmt,
-                    onToggleCommits: self.onToggleCommits.bind(self, cmt) });
+                return React.createElement(CommentView, { comment: cmt, id: createCommentAnchorId(cmt),
+                    onToggleCommits: self.onToggleCommits.bind(self, cmt),
+                    onAnchorClick: self.onCommentClick.bind(self, cmt) });
             });
             rightComments = rightComments.map(function (cmt) {
                 if (cmt === "box") {
                     return React.createElement(CommentBox, {
                         onSubmit: self._onReplyToComment.bind(self, rightComments[rightComments.length - 2]) });
                 }
-                return React.createElement(CommentView, { comment: cmt,
-                    onToggleCommits: self.onToggleCommits.bind(self, cmt) });
+                return React.createElement(CommentView, { comment: cmt, id: createCommentAnchorId(cmt),
+                    onToggleCommits: self.onToggleCommits.bind(self, cmt),
+                    onAnchorClick: self.onCommentClick.bind(self, cmt) });
             });
 
             var numRowsToAdd = Math.max(leftComments.length, rightComments.length);
@@ -1574,10 +1605,11 @@ var triggers = require("./triggers");
 var apiMapper = require("./api-mapper");
 var PullRequest = require("./models/pull-request");
 
-function Controller(dispatcher, httpApi, diffController) {
+function Controller(dispatcher, httpApi, diffController, githubDelays) {
     this.dispatcher = dispatcher;
     this.httpApi = httpApi;
     this.diffController = diffController;
+    this.githubDelays = githubDelays;
     this._currentPullRequest = null;
 }
 
@@ -1720,10 +1752,9 @@ Controller.prototype.squashMergeWithRewrite = function (pr, commitMessage) {
 
     return Promise.try(function () {
         return _this.httpApi.squashBranch(pr.getSource().getRepo().getCloneUrl(), pr.getSource().getRef(), pr.getDest().getRepo().getCloneUrl(), pr.getDest().getRef(), commitMessage);
-    }).delay(200) // Github's API isn't great at noticing a new head sha.
-    .then(function (apiData) {
+    }).delay(this.githubDelays.POST_PUSH_MS).then(function (apiData) {
         return _this.merge(pr, commitMessage, apiData.body.sha);
-    }).delay(1000).then(function () {
+    }).delay(this.githubDelays.POST_MERGE_MS).then(function () {
         return _this.refresh();
     }).catch(function (err) {
         return _this._handleMergeError(err);
@@ -1735,7 +1766,7 @@ Controller.prototype.squashMergeWithoutRewrite = function (pr, commitMessage) {
 
     return Promise.try(function () {
         return _this2.httpApi.squashMerge(pr.getSource().getRepo().getCloneUrl(), pr.getSource().getRef(), pr.getDest().getRepo().getCloneUrl(), pr.getDest().getRef(), commitMessage);
-    }).delay(1000).then(function () {
+    }).delay(this.githubDelays.POST_MERGE_MS).then(function () {
         return _this2.refresh();
     }).catch(function (err) {
         return _this2._handleMergeError(err);
@@ -1747,10 +1778,27 @@ Controller.prototype.merge = function (pr, commitMessage, opt_sha) {
 
     return Promise.try(function () {
         return _this3.httpApi.merge(pr.getRepo(), pr.getId(), opt_sha || pr.getSource().getSha(), commitMessage);
-    }).delay(1000).then(function () {
+    }).delay(this.githubDelays.POST_MERGE_MS).then(function () {
         return _this3.refresh();
     }).catch(function (err) {
         return _this3._handleMergeError(err);
+    });
+};
+
+Controller.prototype.close = function (pr) {
+    var _this4 = this;
+
+    return this.httpApi.close(pr.getRepo(), pr.getId()).then(function () {
+        return _this4.refresh();
+    });
+};
+
+Controller.prototype.open = function (pr) {
+    var _this5 = this;
+
+    return this.httpApi.open(pr.getRepo(), pr.getId()).delay(200) // In hopes that we'll get a mergeable value
+    .then(function () {
+        return _this5.refresh();
     });
 };
 
@@ -1886,6 +1934,18 @@ GithubApi.prototype.postLineCommentResponse = function (repo, pr, text, commentI
     return this._post("/repos/" + repo + "/pulls/" + pr + "/comments", {
         body: text,
         in_reply_to: commentId
+    });
+};
+
+GithubApi.prototype.close = function (repo, pr) {
+    return this._post("/repos/" + repo + "/pulls/" + pr, {
+        state: "closed"
+    });
+};
+
+GithubApi.prototype.open = function (repo, pr) {
+    return this._post("/repos/" + repo + "/pulls/" + pr, {
+        state: "open"
     });
 };
 
@@ -3462,6 +3522,23 @@ SessionStore.prototype.getRequestId = function () {
     return this.store.getItem(ID_REQUEST_ID);
 };
 
+SessionStore.prototype.getGithubApiEndpoint = function () {
+    return this.store.getItem("github_api_endpoint") || "https://api.github.com";
+};
+
+SessionStore.prototype.getSupplementaryApiEndpoint = function () {
+    return this.store.getItem("supplementary_api_endpoint") || "https://review.rocks";
+};
+
+SessionStore.prototype.getGithubDelays = function () {
+    // All values are ms
+    var str = this.store.getItem("github_delays");
+    return str ? JSON.parse(str) : {
+        POST_MERGE_MS: 1000,
+        POST_PUSH_MS: 200
+    };
+};
+
 SessionStore.prototype.setAccessToken = function (token) {
     this.store.setItem(ID_ACCESS_TOKEN, token);
 };
@@ -3884,14 +3961,14 @@ var TriggerMixin = require("../logic/triggers").TriggerMixin([_triggers.PullRequ
 var React = require("react");
 var FileDiffListView = require("../components/file-diff-list-view");
 
-function scrollToAnchor(lineId) {
-    var element = document.querySelector("#" + lineId);
+function scrollToAnchor(anchorId) {
+    var element = document.querySelector("#" + anchorId);
     if (element) {
         element.scrollIntoView();
     }
 }
 
-function extractLineIdFromHash() {
+function extractAnchorFromHash() {
     var hashParts = window.location.hash.split('#');
     if (hashParts <= 2) {
         // Sometimes a URL like #/foo#bar will be encoded as #/foo%23bar
@@ -3911,7 +3988,7 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
     },
 
     componentWillMount: function componentWillMount() {
-        this._lineId = extractLineIdFromHash();
+        this._anchorId = extractAnchorFromHash();
     },
 
     // navigating first mount
@@ -3925,9 +4002,9 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
     },
 
     componentDidUpdate: function componentDidUpdate() {
-        if (this.getTrigger(_triggers.FileDiffsTrigger).files && this._lineId) {
-            scrollToAnchor(this._lineId);
-            this._lineId = null; // remember we've scrolled by nuking the id
+        if (this.getTrigger(_triggers.FileDiffsTrigger).files && this.getTrigger(_triggers.LineCommentsTrigger).comments && this._anchorId) {
+            scrollToAnchor(this._anchorId);
+            this._anchorId = null; // remember we've scrolled by nuking the id
         }
     },
 
@@ -3951,13 +4028,21 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
     },
 
     _onFileLineClick: function _onFileLineClick(diff, lineId, line) {
+        this._setHash(lineId);
+    },
+
+    _onFileCommentClick: function _onFileCommentClick(diff, comment, anchorId) {
+        this._setHash(anchorId);
+    },
+
+    _setHash: function _setHash(val) {
         var hashParts = window.location.hash.split("#");
         if (hashParts.length === 2) {
             // no fragment currently
-            window.location.hash = window.location.hash + "#" + lineId;
+            window.location.hash = window.location.hash + "#" + val;
         } else if (hashParts.length === 3) {
             // already has a fragment, clobber it.
-            hashParts[2] = lineId;
+            hashParts[2] = val;
             window.location.hash = hashParts.join("#");
         } else {
             console.error("Unexpected hash parts: %s", hashParts);
@@ -3979,7 +4064,8 @@ module.exports = React.createClass({ displayName: 'DiffsPage',
             onReplyToComment: this.onSubmitReplyToComment,
             onLineComment: this.onSubmitLineComment,
             controller: this.props.controller,
-            onFileLineClick: this._onFileLineClick });
+            onFileLineClick: this._onFileLineClick,
+            onFileCommentClick: this._onFileCommentClick });
     }
 });
 },{"../components/file-diff-list-view":8,"../logic/triggers":31,"react":589}],35:[function(require,module,exports){
@@ -4170,7 +4256,7 @@ module.exports = React.createClass({ displayName: 'MergePage',
         if (event.target.textContent === SQUASH_MERGE) {
             commitMessage += "\n\nSquash-merged from pull request #" + pr.getId();
         } else if (event.target.textContent === MERGE_WITHOUT_SQUASH) {
-            commitMessage = "Merge pull request # " + pr.getId() + " from " + (pr.getSource().getUser().name + "/" + pr.getSource().getRef());
+            commitMessage = "Merge pull request #" + pr.getId() + " from " + (pr.getSource().getUser().name + "/" + pr.getSource().getRef());
         }
 
         this.setState({
@@ -4193,11 +4279,20 @@ module.exports = React.createClass({ displayName: 'MergePage',
     },
 
     gotMergeError: function gotMergeError() {
-        return Object.keys(this.getTrigger(_triggers.MergeErrorTrigger).error).length !== 0;
+        var error = this.getTrigger(_triggers.MergeErrorTrigger).error;
+        return error && Object.keys(error).length !== 0;
     },
 
     onChangeText: function onChangeText(event) {
         this.setState({ commitMessage: event.target.value });
+    },
+
+    close: function close() {
+        this.props.controller.close(this.getTrigger(_triggers.PullRequestTrigger).pr);
+    },
+
+    open: function open() {
+        this.props.controller.open(this.getTrigger(_triggers.PullRequestTrigger).pr);
     },
 
     render: function render() {
@@ -4214,6 +4309,20 @@ module.exports = React.createClass({ displayName: 'MergePage',
                 "div",
                 { className: "MergeOptionContainer" },
                 "PR has been merged"
+            );
+        }
+        var SPACE = " "; // It would be really nice if JSX had a nicer way to force a space.
+        if (pr.getState() === "closed") {
+            return React.createElement(
+                "div",
+                { className: "MergeOptionContainer" },
+                "PR has been closed -",
+                SPACE,
+                React.createElement(
+                    "span",
+                    { onClick: this.open, className: "OpenButton" },
+                    "Re-open"
+                )
             );
         }
         var mergeable = pr.getMergeable();
@@ -4241,22 +4350,27 @@ module.exports = React.createClass({ displayName: 'MergePage',
                 { className: "MergeOptionContainer" },
                 React.createElement(
                     "span",
-                    { onClick: this.promptForCommitMessage, className: "link" },
+                    { onClick: this.promptForCommitMessage, className: "MergeButton_mergable" },
                     SQUASH_REWRITING_HISTORY
                 ),
                 React.createElement("br", null),
                 React.createElement(
                     "span",
-                    { onClick: this.promptForCommitMessage, className: "link" },
+                    { onClick: this.promptForCommitMessage, className: "MergeButton_mergable" },
                     SQUASH_MERGE
                 ),
                 React.createElement("br", null),
                 React.createElement(
                     "span",
-                    { onClick: this.promptForCommitMessage, className: "link" },
+                    { onClick: this.promptForCommitMessage, className: "MergeButton_mergable" },
                     MERGE_WITHOUT_SQUASH
                 ),
                 React.createElement("br", null),
+                React.createElement(
+                    "span",
+                    { onClick: this.close, className: "CloseButton" },
+                    "Close"
+                ),
                 React.createElement("br", null),
                 "Commits:",
                 React.createElement(CommitListView, {
@@ -4374,6 +4488,9 @@ module.exports = React.createClass({ displayName: 'PullRequestPage',
                 " wants to merge"
             );
         }
+
+        var mergeTab = pr.getState() === "closed" ? "Open" : "Merge/Close";
+
         return React.createElement(
             "div",
             null,
@@ -4444,7 +4561,7 @@ module.exports = React.createClass({ displayName: 'PullRequestPage',
                 React.createElement(
                     Link,
                     { to: pathPrefix + "/merge", className: "MergePage_link" },
-                    "Merge"
+                    mergeTab
                 )
             ),
             this.props.children
@@ -4455,6 +4572,7 @@ module.exports = React.createClass({ displayName: 'PullRequestPage',
 "use strict";
 
 var React = require("react");
+var Link = require("react-router").Link;
 var InfoGetter = require("../components/info-getter");
 
 module.exports = React.createClass({ displayName: 'RootPage',
@@ -4482,6 +4600,11 @@ module.exports = React.createClass({ displayName: 'RootPage',
         return React.createElement(
             "div",
             null,
+            React.createElement(
+                Link,
+                { to: "/list" },
+                "View all Pull Requests"
+            ),
             React.createElement(InfoGetter, {
                 token: this.props.sessionStore.getAccessToken(),
                 repo: this.props.sessionStore.getRepositoryId(),
@@ -4492,7 +4615,7 @@ module.exports = React.createClass({ displayName: 'RootPage',
         );
     }
 });
-},{"../components/info-getter":10,"react":589}],40:[function(require,module,exports){
+},{"../components/info-getter":10,"react":589,"react-router":408}],40:[function(require,module,exports){
 (function (process,global){
 /* @preserve
  * The MIT License (MIT)
