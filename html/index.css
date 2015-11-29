@@ -212,6 +212,15 @@ table td:first-child {
     border-radius: 4px;
 }
 
+.CommentView_anchorLink {
+    height: 1em;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
 
 
 .CommitView {
