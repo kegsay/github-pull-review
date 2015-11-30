@@ -27,8 +27,8 @@ test.describe("Merge page", function() {
             builder
                 .usingServer(`http://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_ACCESS_TOKEN}@ondemand.saucelabs.com/wd/hub`)
                 .withCapabilities({
-                    tunnel-identifier: process.env.TRAVIS_JOB_NUMBER,
-                    build: process.env.TRAVIS_BUILD_NUMBER
+                    "tunnel-identifier": process.env.TRAVIS_JOB_NUMBER,
+                    build: `${process.env.TRAVIS_BUILD_NUMBER} (${TRAVIS_PULL_REQUEST})`
                 })
         }
         driver = builder.build();
