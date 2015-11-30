@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "babel lib/ --out-dir gen/ && browserify -e gen/app.js -o build/bundle.js && shjs build.js",
-    "test": "npm run typecheck && npm run build && npm run lint",
+    "test": "npm run typecheck && npm run build && npm run lint && npm run testui",
     "testui": "mocha tests/ui/merge.spec.js",
     "lint": "eslint lib tests/ui",
     "typecheck": "flow check lib/",
