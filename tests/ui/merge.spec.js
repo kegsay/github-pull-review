@@ -21,9 +21,17 @@ test.describe("Merge page", function() {
 
     test.beforeEach(() => {
         stubs = new Stubs();
-        driver = new webdriver.Builder()
-            .forBrowser("chrome")
-            .build();
+        var builder = new webdriver.Builder()
+            .forBrowser("chrome");
+        if (process.env.TRAVIS) {
+            builder
+                .usingServer(`http://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_ACCESS_TOKEN}@ondemand.saucelabs.com/wd/hub`)
+                .withCapabilities({
+                    tunnel-identifier: process.env.TRAVIS_JOB_NUMBER,
+                    build: process.env.TRAVIS_BUILD_NUMBER
+                })
+        }
+        driver = builder.build();
         driver.manage().timeouts().implicitlyWait(200)
             .then(() => stubs.init(driver));
     });

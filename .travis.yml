@@ -5,3 +5,11 @@ node_js:
 # Don't do submodules since it is a SSH URL and it can't do that
 git:
   submodules: false
+
+env:
+ global:
+  - SAUCE_USERNAME=reviewrocks
+  - secure: "MXY8tE+7XlXUE/LgEzxk5o7bbNVd/8RqeKutIohi+O3RKUtNaiAykCvZKCikIEF1CCIvLjKM83vDOQ6m25y6Zaf/dLt8ixik5QA92gqn55sYfLN+lV1ZPKsCHgUAsEf1Rcs9jG64ysGNwlCUE8VSiaQ2P1w2uNP7VuOkZEOCUICRrpvoNkzllQOcfmW223slqEaMJrSgpI7FitsE0NHozWW4mgrvDDBtIDv+ZBZhLlHMLeP4gWMjGWkdrpNQ1Z/XGDC6trcJSnyj3D7FivQt9kfG5ouBYEWjZM10IvCM1BGar4STyJOsvGIPFKlmr4Y/tgwze89/0iKPBL6uC0M4/ooPc3w+3y4MqwRUQf1K0Uw+cu7hsPz4OUurbvkRu09zAs6WmftWEKHZbSAszc/SRy25sJ0fBrjxbpoUFVNMrNNrA13SoV9nkENLxGTQatOitJHljizpaWfVZMrbU5X583bLzUK/87Pw9H+XMJEbcZI/PJw1TdZoBeT8tPPFUcqoH/cbl4VI7X3wHEDMfcXBYcTeY9INOFydcptiFUkAiZ8lUXTLkw0necNNfJmj6ojVFFQP04L+Bl+6SlD2qEdOP67BnhUsumHwKV/pa8sQ1ax9oPdDAs5LcpN+nFirCCNUwLzQIZeKdf+1bxMIfuuYP5j9AqEtpu4Ed8kV6Z/MroU="
+
+addons:
+ sauce_connect: true
