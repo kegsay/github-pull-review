@@ -420,3 +420,11 @@ table td:first-child {
 .ActionsPage_action_filepath {
     margin-right: 10px;
 }
+
+
+.forkribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+  }
