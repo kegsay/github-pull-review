@@ -111,6 +111,18 @@ table td:first-child {
     cursor: progress;
 }
 
+.MergeButton_disabled {
+    background-color: #ccc;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
 .MergeButton_error {
     background-color: #000;
     margin-right: 8px;
