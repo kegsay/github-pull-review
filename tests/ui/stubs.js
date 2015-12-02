@@ -119,7 +119,7 @@ Stubs.prototype.reset = function() {
 Stubs.prototype._serveGpr = function() {
     var server = http.createServer(
         (req, res) => handleGprRequest(
-            "../build" + req.url,
+            "build" + req.url,
             res,
             /*expandIndex=*/true
         )

@@ -56,7 +56,7 @@ test.describe("Merge page", function() {
 
             driver.getGprPage("/repos/someone/some-repo/1/merge");
             stubs.queueSuccessfulRewriteHistory();
-            driver.findElement(By.css(".MergeOptionContainer > span.link:nth-of-type(1)")).click();
+            driver.findElement(By.css(".MergeOptionContainer > span.MergeButton_mergable:nth-of-type(1)")).click();
             driver.findElement(By.tagName("textarea")).sendKeys(
                 utils.keysToDelete("PR title"), "my commit message"
             );
@@ -71,7 +71,7 @@ test.describe("Merge page", function() {
 
         function tryRewriteMerge(pr, expectCommitMessage) {
             driver.getGprPage("/repos/" + pr + "/merge");
-            driver.findElement(By.css(".MergeOptionContainer > span.link:nth-of-type(1)")).click();
+            driver.findElement(By.css(".MergeOptionContainer > span.MergeButton_mergable:nth-of-type(1)")).click();
             driver.findElement(By.tagName("textarea")).getText()
                 .then((text) => assert(text).equalTo(expectCommitMessage));
             driver.findElement(By.className("MergeButton_mergable")).click();
