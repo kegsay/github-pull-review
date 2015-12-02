@@ -1,5 +1,7 @@
 gen
 
+*.swp
+
 # Logs
 logs
 *.log
