@@ -52,6 +52,19 @@ table td:first-child {
 
 
 
+.LoginButton {
+    background-color: #6cc644;
+    margin-right: 8px;
+    padding: 4px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 .PullRequestOverview_title {
     word-wrap: break-word;
     font-size: 30px;
