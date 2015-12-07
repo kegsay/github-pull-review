@@ -53,3 +53,5 @@ Then host the `build` folder (e.g. using `http-server`). **The** `build` **direc
  $ cd build
  $ git submodule update --init --recursive
 ```
+
+Some functionality (notably: history rewriting, squash merging, and oauth) is backed by a server whose code lives at https://github.com/illicitonion/gitrust - there is one of these running at https://review.rocks which you can point your server at for most functionality, but supporting OAuth flows will require you to run your own, with your own github oauth client secret.
