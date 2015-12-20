@@ -221,6 +221,7 @@ table td:first-child {
     padding-left: 15px;
     padding-top: 5px;
     padding-bottom: 5px;
+    height: 25px;
 }
 
 .CommentView_body {
