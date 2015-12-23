@@ -4536,6 +4536,7 @@ module.exports = React.createClass({ displayName: 'ListPage',
             return React.createElement(
                 "div",
                 null,
+                React.createElement(GprHeader, { showBackLink: false }),
                 "Loading..."
             );
         }
@@ -4543,6 +4544,7 @@ module.exports = React.createClass({ displayName: 'ListPage',
             return React.createElement(
                 "div",
                 null,
+                React.createElement(GprHeader, { showBackLink: false }),
                 "Error: ",
                 prList.error
             );
