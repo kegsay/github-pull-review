@@ -37,7 +37,7 @@ table {
     border-collapse: collapse;
 }
 table td {
-    border-left: 1px solid #000;
+    border-left: 1px solid #a9a9a9;
     padding-left: 3px;
     padding-right: 3px;
 }
@@ -323,7 +323,7 @@ table td:first-child {
 
 
 .FileDiffView {
-    border: 1px solid black;
+    border: 1px solid #a9a9a9;
     margin-top: 10px;
 }
 
@@ -454,7 +454,7 @@ table td:first-child {
 
 
 .CommentDiffListView {
-    border: 1px solid;
+    border: 1px solid #a9a9a9;
     margin: 10px;
 }
 
@@ -469,7 +469,7 @@ table td:first-child {
 
 .ActionsPage_action {
     background-color: #f9f9f9;
-    border: 1px solid;
+    border: 1px solid #a9a9a9;
     margin-top: 15px;
 }
 
