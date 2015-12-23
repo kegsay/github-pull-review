@@ -1,5 +1,9 @@
 body {
     font-family: Helvetica, arial;
+    margin-right: 8px;
+    margin-left: 8px;
+    margin-bottom: 8px;
+    margin-top: 0px;
 }
 
 textarea {
@@ -65,6 +69,30 @@ table td:first-child {
     text-decoration: none;
     cursor: pointer;
 }
+
+
+
+.GprHeader {
+    background-color: #eee;
+    border-bottom: 1px solid #a9a9a9;
+}
+
+.GprHeader_title {
+    color: #000;
+    font-weight: bold;
+    font-size: 36px;
+    text-align: center;
+}
+
+.GprHeader_back {
+    color: #fff;
+    font-weight: bold;
+    float: left;
+    padding: 5px;
+    margin-top: 6px;
+}
+
+
 
 .PullRequestOverview_title {
     word-wrap: break-word;
