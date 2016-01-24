@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <script>
+        console.log("Loaded");
+
+        window.addEventListener("message", function(event) {
+            console.log("Recv");
+            console.log(JSON.stringify(event));
+
+
+            var req = new XMLHttpRequest();
+            req.addEventListener("load", function(data) {
+                console.log("Data: %s", data);
+                console.log("Response: %s", req.responseText);
+            });
+            req.open("GET", event.data);
+            req.send();
+            event.source.postMessage("yep", "*");
+        });
+        </script>
+    </head>
+    <body>
+        l
+    </body>
+</html>
