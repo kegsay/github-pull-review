@@ -3,7 +3,7 @@
 
 *A better way to review pull requests.*
 
-[Try it out!](http://kegsay.github.io/github-pull-review/#/repos/kegsay/matrix-neb/8/diffs)
+[Try it out!](http://review.rocks)
 
 Github's UI for reviewing pull requests isn't great. You can't:
  * Do live code edits to code snippets
